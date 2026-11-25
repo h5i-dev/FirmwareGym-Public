@@ -67,7 +67,7 @@ class TaskSummary:
     id: str
     title: str
     summary: str
-    family: str = "classic"
+    family: str = "control"
     level: str = "L1"
     tags: list[str] = None  # type: ignore[assignment]
 
@@ -85,7 +85,7 @@ class Task:
     files: dict[str, str]
     formal: str
     simulation: str
-    family: str = "classic"
+    family: str = "control"
     level: str = "L1"
     tags: list[str] = None  # type: ignore[assignment]
     budgets: dict[str, Any] = None  # type: ignore[assignment]
@@ -228,7 +228,7 @@ class FirmwareGym:
                 id=item["id"],
                 title=item["title"],
                 summary=item["summary"],
-                family=item.get("family", "classic"),
+                family=item.get("family", "control"),
                 level=item.get("level", "L1"),
                 tags=list(item.get("tags", [])),
             )
@@ -245,7 +245,7 @@ class FirmwareGym:
             files=dict(body["files"]),
             formal=body["formal"],
             simulation=body["simulation"],
-            family=body.get("family", "classic"),
+            family=body.get("family", "control"),
             level=body.get("level", "L1"),
             tags=list(body.get("tags", [])),
             budgets=dict(body.get("budgets", {})),

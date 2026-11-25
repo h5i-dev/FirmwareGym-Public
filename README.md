@@ -79,14 +79,18 @@ with OpenEnvClient("https://api.example.com", api_key="fg_live_...") as env:
 
 ## Task Families (`L1`–`L5`)
 
-| Family | Levels | Example Tasks | Core Engineering Properties |
+All 18 tasks define calibrated Cortex-M4 resource `[budgets]` (`max_ram_bytes`, `max_peak_stack_bytes`, `max_binary_bytes`, `max_step_instructions`) and reference-relative `[optimization]` metrics (`avg_step_instructions`, `binary_bytes`, `ram_bytes`, plus domain-specific signals on L4–L5):
+
+| Family | Levels | Tasks | Core Engineering Properties |
 | --- | --- | --- | --- |
-| `classic` | `L1` | `overcurrent-trip`, `thermostat`, `watchdog`, `traffic-light`, `motor-controller`, `battery-manager`, `elevator`, `http-server` | Safety invariants, temporal latches, bounded actuation |
-| `storage` | `L2`, `L4` | `durable-slot`, `flash-kv-store` | All-or-nothing crash consistency, bit-monotone NOR flash, GC safety, wear leveling |
-| `network` | `L2`, `L4` | `idempotent-cmd`, `reliable-cmd-protocol` | Multi-client at-most-once execution across packet loss, reordering, wraparound, and reboots |
-| `scheduler` | `L4` | `rtos-scheduler` | Real-time deadline satisfaction, mutex exclusion, priority inheritance, IRQ preemption |
+| `control` | `L1` | `thermostat`, `motor-controller` | Hysteresis, anti-short-cycle dwell, NTC fail-safe latch, slew-rate limiting, E-stop / OC zero-throttle interlock |
+| `power` | `L1` | `battery-manager`, `overcurrent-trip` | JEITA thermal window, 150 mV OV hysteresis, overcurrent/UV latches, precharge vs fast-charge, electronic breaker |
+| `safety` | `L1` | `traffic-light`, `watchdog`, `elevator` | All-red clearance & yellow-first preemption, STM32 windowed WDT, door-settle & floor-limit interlocks |
+| `network` | `L1`, `L2`, `L4` | `http-server`, `idempotent-cmd`, `reliable-cmd-protocol` | Strict HTTP/1.x request-line parsing, multi-client at-most-once execution across packet loss, reordering, wraparound, and reboots |
+| `storage` | `L2`, `L4` | `durable-slot`, `flash-kv-store` | All-or-nothing crash consistency, bit-monotone NOR flash, GC crash safety, wear leveling |
+| `scheduler` | `L4` | `rtos-scheduler` | Real-time EDF deadline satisfaction, mutex mutual exclusion, priority inheritance, IRQ preemption |
 | `sensor-fusion` | `L2`, `L4` | `sensor-median`, `robust-sensor-fusion` | Sound interval estimation under Byzantine sensor faults, heterogeneous noise, and drift |
-| `vm` | `L2`, `L5` | `step-machine`, `embedded-vm` | Operational semantics equivalence, capability confinement, gas metering, snapshot recovery |
+| `vm` | `L2`, `L5` | `step-machine`, `embedded-vm` | Operational semantics equivalence, capability confinement, gas metering, snapshot crash recovery |
 | `coordination` | `L5` | `warehouse-robots` | Multi-agent collision & swap freedom, battery safety, deadlock-free delivery under packet loss |
 
 ---
