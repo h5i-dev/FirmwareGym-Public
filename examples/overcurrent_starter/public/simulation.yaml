@@ -1,0 +1,39 @@
+name: overcurrent-trip-public
+signals:
+  current_ma:
+    direction: in
+    word: a
+    encoding: int
+  reset:
+    direction: in
+    word: b
+    encoding: bool
+  relay_closed:
+    direction: out
+    word: a
+    encoding: bool
+  fault:
+    direction: out
+    word: b
+    encoding: bool
+steps:
+  # Safe load current: relay stays closed
+  - set_current_ma: 1200
+  - set_reset: false
+  - advance_ms: 10
+  - expect:
+      relay_closed: true
+      fault: false
+  # Overcurrent spike (6000 mA >= 5000 mA): breaker trips immediately
+  - set_current_ma: 6000
+  - advance_ms: 10
+  - expect:
+      relay_closed: false
+      fault: true
+  # Simultaneous reset during overcurrent: safety overrides reset!
+  - set_current_ma: 5000
+  - set_reset: true
+  - advance_ms: 10
+  - expect:
+      relay_closed: false
+      fault: true

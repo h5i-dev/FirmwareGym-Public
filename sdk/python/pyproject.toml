@@ -1,0 +1,15 @@
+[project]
+name = "firmwaregym"
+version = "0.2.0"
+description = "Thin client and OpenEnv adapter for the FirmwareGym evaluation API"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+readme = "README.md"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["firmwaregym*"]

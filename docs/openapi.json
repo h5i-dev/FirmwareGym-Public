@@ -1,0 +1,284 @@
+{
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "in": "header",
+        "name": "X-API-Key",
+        "type": "apiKey"
+      },
+      "BearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Verified & resource-efficient embedded firmware benchmark API. Public endpoints evaluate against public specs only; hidden specs and adversarial fuzzers run on operator pipelines.",
+    "title": "FirmwareGym Evaluation API",
+    "version": "0.2.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Service is healthy (`ok: true`, `status: \"healthy\"`)"
+          }
+        },
+        "security": [],
+        "summary": "Liveness & capacity check (unauthenticated for load balancers & OpenEnv)"
+      }
+    },
+    "/mcp": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "JSON-RPC 2.0 response"
+          }
+        },
+        "summary": "OpenEnv JSON-RPC 2.0 session & tool endpoint (`openenv/session/create`, `openenv/session/close`, `tools/list`, `tools/call`)"
+      }
+    },
+    "/metadata": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OpenEnv metadata"
+          }
+        },
+        "security": [],
+        "summary": "OpenEnv environment metadata (name, version, description)"
+      }
+    },
+    "/schema": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OpenEnv schema"
+          }
+        },
+        "security": [],
+        "summary": "OpenEnv action, observation, and state JSON schemas"
+      }
+    },
+    "/v1/admin/status": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Server telemetry"
+          },
+          "403": {
+            "description": "Forbidden (admin role required)"
+          }
+        },
+        "summary": "Admin operational telemetry (requires admin role)"
+      }
+    },
+    "/v1/jobs": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "files": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "task_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "task_id",
+                  "files"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Job accepted and queued"
+          },
+          "400": {
+            "description": "Invalid submission (does not consume quota)"
+          },
+          "404": {
+            "description": "Unknown task"
+          },
+          "429": {
+            "description": "Rate limit, per-tenant concurrency cap, or monthly quota exceeded"
+          },
+          "503": {
+            "description": "Global evaluation queue is full (`Retry-After` header set)"
+          }
+        },
+        "summary": "Submit an asynchronous evaluation job (recommended for Renode / Lean 4 proofs)"
+      }
+    },
+    "/v1/jobs/{job_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status and optional Evaluation payload"
+          },
+          "404": {
+            "description": "Unknown job"
+          }
+        },
+        "summary": "Poll status and result of an async evaluation job owned by the caller"
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Authenticated identity and `usage` snapshot (`active_jobs`, `max_concurrent_jobs`, `monthly_used`, `monthly_quota`, `monthly_remaining`, `month`)"
+          },
+          "401": {
+            "description": "Missing or invalid API key"
+          }
+        },
+        "summary": "Return caller API key identity, role, rate-limit quota, active concurrency, and UTC monthly usage"
+      }
+    },
+    "/v1/tasks": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "family",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task catalog summary"
+          }
+        },
+        "summary": "List tasks (supports optional ?family= and ?level= filters)"
+      }
+    },
+    "/v1/tasks/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task detail"
+          },
+          "404": {
+            "description": "Unknown task"
+          }
+        },
+        "summary": "Fetch task README, starter Rust crate, public Lean 4 spec, budgets, optimization metrics, and public simulation scenario"
+      }
+    },
+    "/v1/tasks/{id}/evaluate": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "files": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "files"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Evaluation result (`compiled`, `formal`, `simulation`, `metrics` [`binary_bytes`, `static_ram_bytes`, `state_bytes`, `peak_stack_bytes`, `total_ram_bytes`, `executed_instructions`, `max_step_instructions`, `avg_step_instructions`, `signals`], `budgets`, `performance`, `reward`)"
+          },
+          "400": {
+            "description": "Rejected submission (invalid paths, size, `unsafe`/`extern`, or forbidden macros; does not consume quota)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Rate limit, per-tenant concurrency cap, or monthly quota exceeded"
+          },
+          "503": {
+            "description": "Global evaluation queue is full (`Retry-After` header set)"
+          }
+        },
+        "summary": "Synchronously compile and evaluate a Rust firmware submission against public specs"
+      }
+    },
+    "/ws": {
+      "get": {
+        "responses": {
+          "101": {
+            "description": "WebSocket upgraded"
+          }
+        },
+        "summary": "OpenEnv WebSocket RL episode endpoint (`reset`, `step`, `state`, `close`; supports structured `files`/`code` and TextArenaEnv `message` actions)"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    },
+    {
+      "ApiKeyAuth": []
+    }
+  ]
+}
