@@ -1,108 +1,144 @@
 # FirmwareGym
 
-**FirmwareGym** is a benchmark and reinforcement-learning environment for formally verified, resource-constrained embedded Rust (`#![no_std]`) firmware.
+**FirmwareGym** is a benchmark and reinforcement learning environment for generating formally verifiable, high-performance embedded firmware. This benchmark challenges AI agents to develop Rust (`#![no_std]`) firmware for realistic embedded systems, satisfying formal specifications and hardware-level tests while minimizing execution costs and memory usage.
 
-Agents submit safe `#![no_std]` Rust firmware crates and receive structured feedback across four dimensions:
-- **Formal Verification (Lean 4 / Charon / Aeneas)**: Proves safety, liveness, and functional properties directly on the extracted Rust implementation (checked against Lean's standard axioms only).
-- **Hardware Simulation (Renode Cortex-M4)**: Links the submission into a bare-metal ARM Cortex-M4 ELF and executes declarative multi-step hardware scenarios.
-- **Exact Binary & Runtime Performance Metrics**: Measures ARM ELF code size (`binary_bytes`), static + state RAM (`total_ram_bytes`), runtime peak stack watermark (`peak_stack_bytes`), and idle-free per-step Cortex-M4 instruction counts (`executed_instructions`, `max_step_instructions`, `avg_step_instructions`).
-- **Resource Budgets & Customizable Rewards**: Returns all raw signals, budget limits, reference baselines, and a default correctness-gated reward (`correctness_gated_v1`) so you can plug in your own RL reward function.
+## Evaluation
 
-This public repository contains the **Python SDK**, **API & OpenEnv protocol specifications**, and **runnable client examples**.
+FirmwareGym evaluates each firmware submission across four dimensions:
 
----
+- **Formal verification**: The number and proportion of successfully proven properties using [h5i](https://github.com/h5i-dev/h5i) and Lean 4.
+- **Simulation pass rate**: he number and proportion of passed test scenarios when executing compiled firmware on virtual hardware using [Renode](https://github.com/renode/renode).
+- **Execution efficiency**: Total, average, and maximum per-step CPU instruction counts.
+- **Memory efficiency**: Binary size, RAM usage, and peak stack usage.
 
-## Install the Python SDK
+Performance is measured against task-specific resource budgets and reference implementations. The default reward function rewards performance improvements only after all required correctness checks pass.
 
-Requires Python 3.11+ (zero external dependencies — standard library only):
+All raw evaluation metrics are accessible through the SDK, allowing researchers to define custom reward functions for their RL training objectives.
+
+## Tasks
+
+FirmwareGym currently includes 18 tasks, with a planned collection of over 100 tasks across five difficulty levels (L1–L5), ranging from basic device controllers to complex, fault-tolerant embedded systems.
+
+Representative tasks include:
+
+| Task | Engineering challenges |
+|---|---|
+| Battery Management System | Thermal protection, voltage monitoring, fault recovery |
+| Crash-Consistent Flash Storage | Power failures, atomic updates, garbage collection, wear leveling |
+| Reliable Communication Protocol | Packet loss, reordering, duplicate execution, reboots |
+| Real-Time Scheduler | Deadline satisfaction, resource contention, interrupt handling |
+| Robust Sensor Fusion | Byzantine sensor faults, measurement noise, uncertainty |
+| Embedded Virtual Machine | Operational semantics, capability isolation, execution metering |
+| Autonomous Warehouse Robots | Multi-agent coordination, collision avoidance, energy management |
+
+Each task includes formal correctness requirements, hardware simulation scenarios, resource budgets, and performance baselines.
+
+The full task collection, reference implementations, and hidden evaluation specifications are not publicly distributed.
+
+## Getting Started
+
+This repository provides the open-source Python SDK, API specifications, OpenEnv integration, and runnable examples.
+
+### Installation
+
+Requires Python 3.11+. The SDK has no external Python dependencies.
 
 ```bash
-pip install ./sdk/python
-# or directly from GitHub:
 pip install "git+https://github.com/h5i-dev/FirmwareGym-Public.git#subdirectory=sdk/python"
 ```
 
----
-
-## Quickstart (REST & Async Jobs)
+### Firmware Evaluation
 
 ```python
-from firmwaregym import FirmwareGym, Evaluation, compute_reward
+from firmwaregym import FirmwareGym
 
-# Reads FIRMWAREGYM_API_KEY automatically if `api_key` is omitted
-gym = FirmwareGym("https://api.example.com", api_key="fg_live_...")
+gym = FirmwareGym(
+    "https://api.example.com",
+    api_key="fg_live_..."
+)
 
-# Check identity and remaining quota
-print(gym.whoami())
-
-# Browse tasks by difficulty or family
+# Browse available tasks
 tasks = gym.list_tasks(level="L4")
 task = gym.get_task("overcurrent-trip")
 
-# Submit asynchronously (recommended for Renode + Lean 4 proofs)
-result = gym.evaluate_async(task.id, files={"src/lib.rs": rust_source})
-print("formal:", result.formal.passed, "/", result.formal.total)
-print("simulation:", result.simulation.passed, "/", result.simulation.total)
-print("metrics:", result.metrics)
-print("default reward:", result.reward)
+# Submit firmware for evaluation
+result = gym.evaluate_async(
+    task.id,
+    files={"src/lib.rs": rust_source}
+)
 
-# Compute a custom RL reward directly from raw metrics
-def custom_reward(ev: Evaluation) -> float:
-    if not ev.compiled or ev.simulation.passed < ev.simulation.total:
-        return 0.0
-    instrs = (ev.metrics.max_step_instructions or 10_000) if ev.metrics else 10_000
-    return 0.5 + 0.5 * (100.0 / (100.0 + instrs))
-
-print("custom reward:", custom_reward(result))
+print("Formal verification:", result.formal.passed, "/", result.formal.total)
+print("Simulation:", result.simulation.passed, "/", result.simulation.total)
+print("Performance:", result.metrics)
+print("Reward:", result.reward)
 ```
 
----
+### Reinforcement Learning with OpenEnv
 
-## Quickstart (OpenEnv WebSocket RL Rollouts)
-
-FirmwareGym exposes an **OpenEnv-compatible adapter** (`/ws`, `/mcp`, `/metadata`, `/schema`) compatible with both official OpenEnv Python clients (`EnvClient` / `TextArenaEnv`) and the built-in zero-dependency `OpenEnvClient`:
+FirmwareGym supports the OpenEnv protocol for multi-turn RL rollouts, allowing agents to iteratively develop, verify, and optimize firmware based on structured evaluation feedback.
 
 ```python
 from firmwaregym import OpenEnvClient
 
-with OpenEnvClient("https://api.example.com", api_key="fg_live_...") as env:
-    obs = env.reset(task_id="overcurrent-trip", max_steps=6)
+with OpenEnvClient(
+    "https://api.example.com",
+    api_key="fg_live_..."
+) as env:
+    obs = env.reset(
+        task_id="overcurrent-trip",
+        max_steps=6
+    )
+
     print(obs.observation["prompt"])
 
-    # Accepts structured `files=`/`code=` OR TextArenaEnv markdown `message=`
     step = env.step(code=rust_source)
-    print("reward:", step.reward, "done:", step.done)
-    print("state:", env.state())
+
+    print("Reward:", step.reward)
+    print("Done:", step.done)
 ```
 
----
+### Custom Reward Functions
 
-## Task Families (`L1`–`L5`)
+Researchers can define their own reward functions using raw verification results and performance metrics.
 
-All 18 tasks define calibrated Cortex-M4 resource `[budgets]` (`max_ram_bytes`, `max_peak_stack_bytes`, `max_binary_bytes`, `max_step_instructions`) and reference-relative `[optimization]` metrics (`avg_step_instructions`, `binary_bytes`, `ram_bytes`, plus domain-specific signals on L4–L5):
+```python
+from firmwaregym import Evaluation
 
-| Family | Levels | Tasks | Core Engineering Properties |
-| --- | --- | --- | --- |
-| `control` | `L1` | `thermostat`, `motor-controller` | Hysteresis, anti-short-cycle dwell, NTC fail-safe latch, slew-rate limiting, E-stop / OC zero-throttle interlock |
-| `power` | `L1` | `battery-manager`, `overcurrent-trip` | JEITA thermal window, 150 mV OV hysteresis, overcurrent/UV latches, precharge vs fast-charge, electronic breaker |
-| `safety` | `L1` | `traffic-light`, `watchdog`, `elevator` | All-red clearance & yellow-first preemption, STM32 windowed WDT, door-settle & floor-limit interlocks |
-| `network` | `L1`, `L2`, `L4` | `http-server`, `idempotent-cmd`, `reliable-cmd-protocol` | Strict HTTP/1.x request-line parsing, multi-client at-most-once execution across packet loss, reordering, wraparound, and reboots |
-| `storage` | `L2`, `L4` | `durable-slot`, `flash-kv-store` | All-or-nothing crash consistency, bit-monotone NOR flash, GC crash safety, wear leveling |
-| `scheduler` | `L4` | `rtos-scheduler` | Real-time EDF deadline satisfaction, mutex mutual exclusion, priority inheritance, IRQ preemption |
-| `sensor-fusion` | `L2`, `L4` | `sensor-median`, `robust-sensor-fusion` | Sound interval estimation under Byzantine sensor faults, heterogeneous noise, and drift |
-| `vm` | `L2`, `L5` | `step-machine`, `embedded-vm` | Operational semantics equivalence, capability confinement, gas metering, snapshot crash recovery |
-| `coordination` | `L5` | `warehouse-robots` | Multi-agent collision & swap freedom, battery safety, deadlock-free delivery under packet loss |
+def custom_reward(ev: Evaluation) -> float:
+    if not ev.compiled:
+        return 0.0
 
----
+    if ev.formal.passed < ev.formal.total:
+        return 0.0
 
-## Repository Contents
+    if ev.simulation.passed < ev.simulation.total:
+        return 0.0
 
-- [`docs/API.md`](docs/API.md) — Full REST (`/v1/...`) and OpenEnv (`/ws`, `/mcp`) API reference
-- [`docs/openapi.json`](docs/openapi.json) — Machine-readable OpenAPI 3.1 schema
-- [`sdk/python/`](sdk/python/) — Zero-dependency Python SDK (`FirmwareGym`, `OpenEnvClient`, `compute_reward`)
-- [`examples/quickstart.py`](examples/quickstart.py) — Async evaluation & custom reward script
-- [`examples/openenv_rollout.py`](examples/openenv_rollout.py) — Multi-turn OpenEnv WebSocket rollout loop
-- [`examples/overcurrent_starter/`](examples/overcurrent_starter/) — Sample public task starter & specification
+    if ev.metrics is None:
+        return 0.0
+
+    instructions = ev.metrics.max_step_instructions
+
+    if instructions is None:
+        return 0.0
+
+    return 0.5 + 0.5 * (100.0 / (100.0 + instructions))
+```
+
+## Access
+
+The Python SDK, API specifications, and selected sample tasks are publicly available under the Apache 2.0 license.
+
+Access to the full task collection and hosted evaluation environment requires an API key.
+
+## Documentation
+
+- [API Reference](docs/API.md) — REST and OpenEnv API documentation.
+- [OpenAPI Schema](docs/openapi.json) — Machine-readable API specification.
+- [Python SDK](sdk/python/) — Client library and reward utilities.
+- [Quickstart Example](examples/quickstart.py) — Firmware evaluation and custom rewards.
+- [OpenEnv Example](examples/openenv_rollout.py) — Multi-turn RL rollouts.
+- [Sample Task](examples/overcurrent_starter/) — Public firmware task and starter code.
 
 ## License
 
