@@ -123,9 +123,8 @@ def custom_reward(ev: Evaluation) -> float:
 
 ## 4. Access
 
-The Python SDK, API specifications, and selected sample tasks are publicly available under the Apache 2.0 license.
-
-Access to the full task collection and hosted evaluation environment requires an API key.
+The Python SDK, API specifications, and selected sample tasks are publicly available under the Apache 2.0 license. Access 
+to the full task collection and hosted evaluation environment requires an API key.
 
 ## 5. Documentation
 
