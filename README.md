@@ -2,7 +2,7 @@
 
 **FirmwareGym** is a benchmark and reinforcement learning environment for generating formally verifiable, high-performance firmware. This benchmark challenges AI agents to develop Rust (`#![no_std]`) firmware for realistic embedded systems, satisfying formal specifications and hardware-level tests while optimizing the performance.
 
-## Evaluation
+## 1. Overview
 
 FirmwareGym evaluates each firmware submission across four dimensions:
 
@@ -13,7 +13,7 @@ FirmwareGym evaluates each firmware submission across four dimensions:
 
 All raw evaluation metrics are accessible through the SDK, allowing researchers to define custom reward functions for their RL training objectives.
 
-## Tasks
+## 2. Tasks
 
 FirmwareGym aims to provide over 100 realistic firmware engineering tasks across five difficulty levels (L1–L5), ranging from basic device controllers to complex, fault-tolerant embedded systems.
 
@@ -31,11 +31,11 @@ Examples of tasks include:
 
 Each task defines formal specifications, simulation scenarios, resource budgets, and performance baselines. Selected sample tasks are publicly available, while the full task collection, reference implementations, and hidden evaluation specifications remain private.
 
-## Getting Started
+## 3. Getting Started
 
 This repository provides the open-source Python SDK, API specifications, OpenEnv integration, and runnable examples.
 
-### Installation
+### 3.1. Installation
 
 Requires Python 3.11+. The SDK has no external Python dependencies.
 
@@ -43,7 +43,7 @@ Requires Python 3.11+. The SDK has no external Python dependencies.
 pip install "git+https://github.com/h5i-dev/FirmwareGym-Public.git#subdirectory=sdk/python"
 ```
 
-### Firmware Evaluation
+### 3.2. Firmware Evaluation
 
 ```python
 from firmwaregym import FirmwareGym
@@ -69,7 +69,7 @@ print("Performance:", result.metrics)
 print("Reward:", result.reward)
 ```
 
-### Reinforcement Learning with OpenEnv
+### 3.3. Reinforcement Learning with OpenEnv
 
 FirmwareGym supports the OpenEnv protocol for multi-turn RL rollouts, allowing agents to iteratively develop, verify, and optimize firmware based on structured evaluation feedback.
 
@@ -93,7 +93,7 @@ with OpenEnvClient(
     print("Done:", step.done)
 ```
 
-### Custom Reward Functions
+### 3.4. Custom Reward Functions
 
 Researchers can define their own reward functions using raw verification results and performance metrics.
 
@@ -121,13 +121,13 @@ def custom_reward(ev: Evaluation) -> float:
     return 0.5 + 0.5 * (100.0 / (100.0 + instructions))
 ```
 
-## Access
+## 4. Access
 
 The Python SDK, API specifications, and selected sample tasks are publicly available under the Apache 2.0 license.
 
 Access to the full task collection and hosted evaluation environment requires an API key.
 
-## Documentation
+## 5. Documentation
 
 - [API Reference](docs/API.md) — REST and OpenEnv API documentation.
 - [OpenAPI Schema](docs/openapi.json) — Machine-readable API specification.
@@ -136,6 +136,6 @@ Access to the full task collection and hosted evaluation environment requires an
 - [OpenEnv Example](examples/openenv_rollout.py) — Multi-turn RL rollouts.
 - [Sample Task](examples/overcurrent_starter/) — Public firmware task and starter code.
 
-## License
+## 6. License
 
 Apache License 2.0. See [LICENSE](LICENSE).
