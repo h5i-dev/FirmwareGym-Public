@@ -129,12 +129,12 @@ Access to the full task collection and hosted evaluation environment requires an
 
 ## 5. Documentation
 
-- [API Reference](docs/API.md) — REST and OpenEnv API documentation.
-- [OpenAPI Schema](docs/openapi.json) — Machine-readable API specification.
-- [Python SDK](sdk/python/) — Client library and reward utilities.
-- [Quickstart Example](examples/quickstart.py) — Firmware evaluation and custom rewards.
-- [OpenEnv Example](examples/openenv_rollout.py) — Multi-turn RL rollouts.
-- [Sample Task](examples/overcurrent_starter/) — Public firmware task and starter code.
+- [API Reference](docs/API.md): REST and OpenEnv API documentation.
+- [OpenAPI Schema](docs/openapi.json): Machine-readable API specification.
+- [Python SDK](sdk/python/): Client library and reward utilities.
+- [Quickstart Example](examples/quickstart.py): Firmware evaluation and custom rewards.
+- [OpenEnv Example](examples/openenv_rollout.py): Multi-turn RL rollouts.
+- [Sample Task](examples/overcurrent_starter/): Public firmware task and starter code.
 
 ## 6. License
 
