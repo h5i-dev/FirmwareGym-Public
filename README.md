@@ -7,7 +7,7 @@
 FirmwareGym evaluates each firmware submission across four dimensions:
 
 - **Formal verification**: The number and proportion of successfully proven properties using [h5i](https://github.com/h5i-dev/h5i) and Lean 4.
-- **Simulation pass rate**: he number and proportion of passed test scenarios when executing compiled firmware on virtual hardware using [Renode](https://github.com/renode/renode).
+- **Simulation pass rate**: The number and proportion of passed test scenarios when executing compiled firmware on virtual hardware using [Renode](https://github.com/renode/renode).
 - **Execution efficiency**: Total, average, and maximum per-step CPU instruction counts.
 - **Memory efficiency**: Binary size, RAM usage, and peak stack usage.
 
