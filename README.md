@@ -15,9 +15,9 @@ All raw evaluation metrics are accessible through the SDK, allowing researchers 
 
 ## Tasks
 
-FirmwareGym currently includes 18 tasks, with a planned collection of over 100 tasks across five difficulty levels (L1–L5), ranging from basic device controllers to complex, fault-tolerant embedded systems.
+FirmwareGym aims to provide over 100 realistic firmware engineering tasks across five difficulty levels (L1–L5), ranging from basic device controllers to complex, fault-tolerant embedded systems.
 
-Representative tasks include:
+Examples of tasks include:
 
 | Task | Engineering challenges |
 |---|---|
@@ -29,9 +29,7 @@ Representative tasks include:
 | Embedded Virtual Machine | Operational semantics, capability isolation, execution metering |
 | Autonomous Warehouse Robots | Multi-agent coordination, collision avoidance, energy management |
 
-Each task includes formal correctness requirements, hardware simulation scenarios, resource budgets, and performance baselines.
-
-The full task collection, reference implementations, and hidden evaluation specifications are not publicly distributed.
+Each task defines formal specifications, simulation scenarios, resource budgets, and performance baselines. Selected sample tasks are publicly available, while the full task collection, reference implementations, and hidden evaluation specifications remain private.
 
 ## Getting Started
 
