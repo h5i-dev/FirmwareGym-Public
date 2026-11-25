@@ -1,6 +1,6 @@
 # FirmwareGym
 
-**FirmwareGym** is a benchmark and reinforcement learning environment for generating formally verifiable, high-performance embedded firmware. This benchmark challenges AI agents to develop Rust (`#![no_std]`) firmware for realistic embedded systems, satisfying formal specifications and hardware-level tests while minimizing execution costs and memory usage.
+**FirmwareGym** is a benchmark and reinforcement learning environment for generating formally verifiable, high-performance embedded firmware. This benchmark challenges AI agents to develop Rust (`#![no_std]`) firmware for realistic embedded systems, satisfying formal specifications and hardware-level tests while optimizing the performance.
 
 ## Evaluation
 
