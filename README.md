@@ -11,8 +11,6 @@ FirmwareGym evaluates each firmware submission across four dimensions:
 - **Execution efficiency**: Total, average, and maximum per-step CPU instruction counts.
 - **Memory efficiency**: Binary size, RAM usage, and peak stack usage.
 
-Performance is measured against task-specific resource budgets and reference implementations. The default reward function rewards performance improvements only after all required correctness checks pass.
-
 All raw evaluation metrics are accessible through the SDK, allowing researchers to define custom reward functions for their RL training objectives.
 
 ## Tasks
