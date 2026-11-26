@@ -75,6 +75,9 @@
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
     .grid article { padding: 1.25rem; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); background: var(--panel); }
     .grid p { margin-top: .6rem; }
+    .grid .demo-card { background: #c71e17; }
+    .demo-card a, .demo-card p { color: #fff; }
+    .demo-card a:focus-visible { outline-color: #fff; }
     .table-scroll { margin-top: 1.5rem; overflow-x: auto; }
     table { width: 100%; min-width: 55rem; border-collapse: collapse; text-align: left; }
     th, td { border-bottom: 1px solid var(--line); padding: .72rem .5rem; }
@@ -104,7 +107,7 @@
         <h1>FirmwareGym<span class="accent" aria-hidden="true">.</span></h1>
         <p class="lead">FirmwareGym challenges AI agents to build firmware with the <a href="https://h5i.dev/">h5i framework</a>, prove its behavior in Lean 4, and optimize performance on virtual hardware in Renode.</p>
         <div class="links">
-          <a class="button primary" href="#samples">Explore the sample tasks</a>
+          <a class="button primary" href="https://docs.google.com/forms/d/e/1FAIpQLSfaIKLfzh8ot_YA5KXQJP9tjPrZghitP8DH6fC6kgFVSNNKig/viewform?usp=publish-editor">Book a demo</a>
           <a class="button" href="https://github.com/h5i-dev/FirmwareGym-Public">View on GitHub</a>
         </div>
       </div>
@@ -194,7 +197,7 @@
         <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/sdk/python">Python SDK</a></h3><p>Fetch tasks, submit Rust and Lean, and use raw evaluation metrics to define custom rewards.</p></article>
         <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/docs/API.md">API reference</a></h3><p>Read the evaluation API and response schema.</p></article>
         <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/quickstart.py">Quickstart</a></h3><p>Run a firmware evaluation and compute a custom reward.</p></article>
-        <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/openenv_rollout.py">OpenEnv rollout</a></h3><p>Use evaluation feedback across multiple agent turns.</p></article>
+        <article class="demo-card"><h3><a href="https://docs.google.com/forms/d/e/1FAIpQLSfaIKLfzh8ot_YA5KXQJP9tjPrZghitP8DH6fC6kgFVSNNKig/viewform?usp=publish-editor">Book a demo</a></h3><p>See FirmwareGym in action.</p></article>
       </div>
     </section>
   </main>
