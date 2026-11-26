@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FirmwareGym is a benchmark and reinforcement learning environment for AI agents writing embedded Rust firmware.">
+  <title>FirmwareGym — Embedded firmware benchmark</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #121511;
+      --panel: #191e18;
+      --line: #394237;
+      --text: #edf0e8;
+      --muted: #b5c0b0;
+      --accent: #d5f78c;
+      --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 1rem/1.6 system-ui, sans-serif; }
+    a { color: var(--accent); text-underline-offset: .25em; }
+    a:hover { color: white; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .wrap { width: min(72rem, calc(100% - 2.5rem)); margin-inline: auto; }
+    header, footer { border-block: 1px solid var(--line); }
+    nav, .footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding-block: 1rem; }
+    nav div, .links { display: flex; flex-wrap: wrap; gap: .8rem 1.25rem; }
+    .brand { font: 700 1rem var(--mono); text-decoration: none; }
+    nav div a { color: var(--text); font-size: .9rem; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 5rem); align-items: center; padding-block: clamp(3rem, 9vw, 8rem); }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2, h3 { line-height: 1.05; letter-spacing: -.04em; }
+    h1 { font-size: clamp(2.65rem, 7vw, 6.5rem); }
+    h2 { font-size: clamp(2rem, 4vw, 3.7rem); margin-bottom: 1rem; }
+    h3 { font-size: 1.25rem; letter-spacing: -.02em; }
+    p { color: var(--muted); }
+    .lead { font-size: clamp(1.06rem, 1.8vw, 1.28rem); margin-block: 1.25rem 1.75rem; max-width: 33rem; }
+    .label, .tabs, .rate, code { font-family: var(--mono); }
+    .label { display: block; color: var(--accent); font-size: .875rem; margin-bottom: .75rem; }
+    .button { display: inline-block; padding: .6rem .95rem; border: 1px solid var(--line); border-radius: .3rem; color: var(--text); text-decoration: none; }
+    .primary { color: #17210d; background: var(--accent); border-color: var(--accent); font-weight: 650; }
+    .primary:hover { color: #17210d; background: white; }
+    .terminal { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: .5rem; overflow: hidden; }
+    .tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+    .tabs button { font: inherit; font-size: .875rem; color: var(--muted); background: transparent; border: 0; border-bottom: 2px solid transparent; padding: .7rem .9rem; cursor: pointer; }
+    .tabs button[aria-selected="true"] { color: var(--accent); border-color: var(--accent); }
+    pre { margin: 0; padding: 1.25rem; overflow: auto; font-size: .875rem; }
+    pre strong { color: var(--accent); font-weight: 500; }
+    pre span { color: var(--muted); }
+    .panel-link { display: block; padding: .75rem 1.25rem; border-top: 1px solid var(--line); font-size: .9rem; }
+    section { padding-block: clamp(2.5rem, 6vw, 5rem); border-top: 1px solid var(--line); }
+    .intro { max-width: 51rem; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); margin-top: 1.5rem; }
+    .grid article { padding: 1.25rem 1rem 1.25rem 0; border-bottom: 1px solid var(--line); }
+    .grid p { margin-top: .6rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; text-align: left; }
+    th, td { border-bottom: 1px solid var(--line); padding: .72rem .5rem; }
+    thead { color: var(--muted); }
+    td:nth-child(n+2), thead th:nth-child(n+2) { text-align: right; }
+    tfoot { color: var(--accent); font-weight: 700; }
+    .note { margin-top: 1rem; max-width: 53rem; font-size: .9rem; }
+    .footer { color: var(--muted); font-size: .9rem; }
+    @media (max-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 420px) { .grid { grid-template-columns: 1fr; } th, td { padding-inline: .25rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="wrap" aria-label="Main navigation">
+      <a class="brand" href="./index.html">FirmwareGym</a>
+      <div><a href="#tasks">Tasks</a><a href="#evaluation">Evaluation</a><a href="#results">Results</a><a href="#start">Get started</a></div>
+    </nav>
+  </header>
+  <main class="wrap">
+    <div class="hero">
+      <div>
+        <h1>FirmwareGym</h1>
+        <p class="lead">A benchmark and reinforcement learning environment for AI agents writing embedded firmware. Write Rust <code>no_std</code>, prove its behavior in Lean 4, and run it on virtual hardware with Renode.</p>
+        <div class="links">
+          <a class="button primary" href="#tasks">Explore the sample tasks</a>
+          <a class="button" href="https://github.com/h5i-dev/FirmwareGym-Public">View on GitHub</a>
+        </div>
+      </div>
+      <div class="terminal">
+        <div class="tabs" role="tablist" aria-label="NOR flash task preview">
+          <button id="tab-crash" type="button" role="tab" aria-controls="crash" aria-selected="true">Power cut</button>
+          <button id="tab-rust" type="button" role="tab" aria-controls="rust" aria-selected="false" tabindex="-1">Rust</button>
+          <button id="tab-lean" type="button" role="tab" aria-controls="lean" aria-selected="false" tabindex="-1">Lean</button>
+        </div>
+        <div id="crash" role="tabpanel" aria-labelledby="tab-crash" tabindex="0">
+          <pre><code><span># NOR flash · illustrative batch</span>
+STAGE_PUT     A = 42
+STAGE_DELETE  B
+COMMIT
+<strong>POWER CUT</strong>     <span># before commit reply</span>
+BOOT
+
+<strong>Valid recovery</strong>
+  Old map     A = 7,  B = 9
+  New map     A = 42, B absent
+
+<span># A second reboot recovers the same map.</span></code></pre>
+          <a class="panel-link" href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">Read the NOR flash task</a>
+        </div>
+        <div id="rust" role="tabpanel" aria-labelledby="tab-rust" tabindex="0" hidden>
+          <pre><code><strong>#![no_std]</strong>
+
+<span>// Starter excerpt</span>
+pub fn transition(
+    _state: &amp;State,
+    _input: &amp;Inputs,
+) -&gt; (State, Outputs) {
+    (
+        INITIAL,
+        Outputs { a: 0, b: -1, c: 0, d: 0 },
+    )
+}</code></pre>
+          <a class="panel-link" href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/flash_kv_nor_starter/starter/src/lib.rs">View the Rust starter</a>
+        </div>
+        <div id="lean" role="tabpanel" aria-labelledby="tab-lean" tabindex="0" hidden>
+          <pre><code><span>-- Atomic recovery obligation, excerpt</span>
+
+boot medium = some recovered ∧
+observe recovered allKeys = some values ∧
+<strong>(values = oldKeys ∨ values = newKeys)</strong> ∧
+boot recovered.2 = some again ∧
+observe again allKeys = some values</code></pre>
+          <a class="panel-link" href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/flash_kv_nor_starter/proofs/Submission.lean">View the Lean proof template</a>
+        </div>
+      </div>
+    </div>
+
+    <section id="tasks">
+      <h2>From circuit breakers to crash recovery</h2>
+      <p class="intro">The hosted catalog spans L1–L5, with tasks in control, storage, communication, scheduling, sensor fusion, embedded virtual machines, and robot coordination.</p>
+      <div class="grid">
+        <article>
+          <span class="label">L4 public sample</span>
+          <h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">Crash-consistent NOR flash store</a></h3>
+          <p>Commit a batch across four 160-byte blocks. A cut can land after a byte program or block erase takes effect and before the firmware hears back. Recover the entire old or new map, keep recovery stable, and distribute wear across blocks.</p>
+          <p><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/flash_kv_nor_starter/public/simulation.yaml">View the sample Renode scenario</a></p>
+        </article>
+        <article>
+          <span class="label">Introductory public sample</span>
+          <h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">Overcurrent Trip Latch</a></h3>
+          <p>Open a relay at 5 A or above, even if reset is requested in the same step. Start with a small state machine and prove its safety properties.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="evaluation">
+      <h2>What gets measured</h2>
+      <p class="intro">The Python SDK exposes the raw metrics, so researchers can define their own reinforcement learning rewards.</p>
+      <div class="grid">
+        <article><h3>Formal verification</h3><p>Fixed Lean 4 obligations checked against the submitted Rust implementation.</p></article>
+        <article><h3>Simulation</h3><p>Passed scenarios for compiled firmware running in Renode.</p></article>
+        <article><h3>Execution efficiency</h3><p>Total CPU instructions across scenario steps, plus mean and peak instructions per step.</p></article>
+        <article><h3>Memory efficiency</h3><p>Binary size, RAM usage, and peak stack usage.</p></article>
+      </div>
+    </section>
+
+    <section id="results">
+      <span class="label">Opus 5.5 baseline</span>
+      <h2 id="pass-rate">Task pass rate by domain</h2>
+      <p class="intro">11 of 16 scored tasks passed the final evaluation. The run attempted 18 tasks.</p>
+      <table aria-labelledby="pass-rate" aria-describedby="method">
+        <thead><tr><th scope="col">Domain</th><th scope="col">Passed / scored</th><th scope="col">Pass rate</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Control, power &amp; safety</th><td class="rate">7 / 7</td><td class="rate">100%</td></tr>
+          <tr><th scope="row">Storage</th><td class="rate">1 / 2</td><td class="rate">50%</td></tr>
+          <tr><th scope="row">Communication</th><td class="rate">1 / 2</td><td class="rate">50%</td></tr>
+          <tr><th scope="row">Sensor fusion</th><td class="rate">1 / 2</td><td class="rate">50%</td></tr>
+          <tr><th scope="row">Scheduling &amp; virtual machines</th><td class="rate">1 / 3</td><td class="rate">33%</td></tr>
+          <tr><th scope="row">Robot coordination</th><td class="rate">—</td><td>Unscored</td></tr>
+        </tbody>
+        <tfoot><tr><th scope="row">Overall</th><td class="rate">11 / 16</td><td class="rate">69%</td></tr></tfoot>
+      </table>
+      <p class="note" id="method">One agent run per task, with up to 30 minutes and iterative development feedback. The final grader required successful compilation, all Lean obligations and Renode scenarios, any applicable randomized checks, and all resource budgets. Grader errors left one communication task and one robot coordination task unscored. Percentages use scored tasks and are rounded to whole numbers.</p>
+    </section>
+
+    <section id="start">
+      <h2>Get started</h2>
+      <p class="intro">The Python SDK, API specification, and sample tasks are available under Apache 2.0. The hosted evaluator and full task catalog require an API key from your operator. Hosted development feedback and final benchmark evaluation are run separately.</p>
+      <div class="grid">
+        <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/sdk/python">Python SDK</a></h3><p>Fetch tasks, submit Rust and Lean, and inspect results.</p></article>
+        <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/docs/API.md">API reference</a></h3><p>Read the evaluation API and response schema.</p></article>
+        <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/quickstart.py">Quickstart</a></h3><p>Run a firmware evaluation and compute a custom reward.</p></article>
+        <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/openenv_rollout.py">OpenEnv rollout</a></h3><p>Use evaluation feedback across multiple agent turns.</p></article>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap footer"><a class="brand" href="./index.html">FirmwareGym</a><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/LICENSE">Apache 2.0</a></div>
+  </footer>
+  <script>
+    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+    function selectTab(selected) {
+      for (const tab of tabs) {
+        const active = tab === selected;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        document.getElementById(tab.getAttribute('aria-controls')).hidden = !active;
+      }
+    }
+    for (const [index, tab] of tabs.entries()) {
+      tab.addEventListener('click', () => selectTab(tab));
+      tab.addEventListener('keydown', event => {
+        const nextIndex = {
+          ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+          ArrowRight: (index + 1) % tabs.length,
+          Home: 0,
+          End: tabs.length - 1,
+        }[event.key];
+        if (nextIndex === undefined) return;
+        event.preventDefault();
+        selectTab(tabs[nextIndex]);
+        tabs[nextIndex].focus();
+      });
+    }
+  </script>
+</body>
+</html>

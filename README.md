@@ -29,7 +29,7 @@ Examples of tasks include:
 | Embedded Virtual Machine | Operational semantics, capability isolation, execution metering |
 | Autonomous Warehouse Robots | Multi-agent coordination, collision avoidance, energy management |
 
-The task API provides the README, Rust starter, public Lean specification, fixed theorem obligations, Renode scenario, and resource budgets. This repository includes the Overcurrent Trip sample. The hosted public grader returns development feedback. Organizers run final evaluation separately.
+The task API provides the README, Rust starter, public Lean specification, fixed theorem obligations, Renode scenario, and resource budgets. This repository includes two samples: Overcurrent Trip and an L4 crash-consistent NOR flash key-value store. The hosted public grader returns development feedback. Organizers run final evaluation separately.
 
 ## 3. Getting Started
 
@@ -133,7 +133,8 @@ to the full task collection and hosted evaluation environment requires an API ke
 - [Python SDK](sdk/python/): Client library and reward utilities.
 - [Quickstart Example](examples/quickstart.py): Firmware evaluation and custom rewards.
 - [OpenEnv Example](examples/openenv_rollout.py): Multi-turn RL rollouts.
-- [Sample Task](examples/overcurrent_starter/): Public firmware task and starter code.
+- [Overcurrent Trip](examples/overcurrent_starter/): Introductory task and starter code.
+- [Crash-consistent NOR flash store](examples/flash_kv_nor_starter/): L4 task with a Rust starter and Lean proof template.
 
 ## 6. License
 

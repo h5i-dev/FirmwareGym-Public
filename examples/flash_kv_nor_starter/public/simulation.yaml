@@ -1,0 +1,12 @@
+name: nor-mailbox-invalid-command
+signals:
+  command: {direction: in, word: a, encoding: int}
+  request: {direction: out, word: a, encoding: int}
+  status: {direction: out, word: b, encoding: int}
+steps:
+  - set_command: 999
+  - advance_ms: 0
+  - expect: {request: 0, status: -1}
+  - set_command: 998
+  - advance_ms: 0
+  - expect: {request: 0, status: -1}
