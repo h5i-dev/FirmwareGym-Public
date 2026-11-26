@@ -119,8 +119,8 @@
       <div id="samples" class="samples">
         <p class="intro">The full dataset and task catalog are currently private, and hosted access requires an API key. Two sample tasks are publicly available:</p>
         <ul class="overview-list">
-          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">(Sample - 1) Overcurrent Trip Latch</a> opens a relay at 5 A or above, even during a reset request.</li>
-          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">(Sample - 2) Crash-consistent NOR flash store</a> recovers either the entire old map or the entire new map after a power cut.</li>
+          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">(Sample - 1) Overcurrent Trip Latch</a>. Implement a relay that trips when the current reaches 5 A. Prove in Lean 4 that overcurrent takes priority over a simultaneous reset and that, across any sequence of inputs, the relay stays open after a trip until a reset is requested at a safe current.</li>
+          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">(Sample - 2) Crash-consistent NOR flash store</a>. Implement a key-value store that commits batches of updates to NOR flash. Prove in Lean 4 that a completed commit survives reboot and that a power cut during the specified overwrite-and-delete batch leaves either the entire old map or the entire new map. A second reboot must recover the same map.</li>
         </ul>
       </div>
     </section>
