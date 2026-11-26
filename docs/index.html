@@ -69,8 +69,7 @@
     .workflow-branches::before { content: ""; position: absolute; top: 0; left: 50%; height: 1rem; border-left: 1px solid var(--accent); }
     .workflow-branches::after { content: ""; position: absolute; inset: 1rem 25% auto; height: 1rem; border: 1px solid var(--accent); border-bottom: 0; pointer-events: none; }
     .workflow-branch strong { display: block; line-height: 1.25; }
-    .workflow-branch span, .workflow figcaption { display: block; margin-top: .4rem; color: var(--muted); font-size: .875rem; }
-    .workflow figcaption { margin-top: .85rem; text-align: center; }
+    .workflow-branch span { display: block; margin-top: .4rem; color: var(--muted); font-size: .875rem; }
     .samples { margin-top: 1.5rem; }
     .samples .overview-list { margin-top: .75rem; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
@@ -135,15 +134,14 @@
           <div class="workflow-source"><strong>Rust firmware candidate</strong></div>
           <div class="workflow-branches">
             <div class="workflow-branch">
-              <strong>Verify properties</strong>
+              <strong>Formally verify properties</strong>
               <span>Lean 4 checks proofs against the specification.</span>
             </div>
             <div class="workflow-branch">
-              <strong>Measure performance</strong>
+              <strong>Optimize performance</strong>
               <span>Renode runs scenarios and returns CPU and memory metrics.</span>
             </div>
           </div>
-          <figcaption>Use the measurements to optimize the firmware, then recheck the proofs.</figcaption>
         </figure>
       </div>
       <div id="samples" class="samples">
