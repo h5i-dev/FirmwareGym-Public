@@ -14,7 +14,6 @@
       --gutter: clamp(1rem, 3vw, 2.125rem);
       --bg: #070707;
       --panel-alt: #151513;
-      --grid: #1a1a18;
       --solid: #e0241b;
       --sans: Archivo, system-ui, sans-serif;
       --panel: #0e0e0d;
@@ -42,19 +41,21 @@
       grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
       align-items: center;
       background:
-        radial-gradient(ellipse at 85% 30%, #e0241b21, transparent 55%),
-        linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 48px 48px,
-        linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 48px 48px;
+        linear-gradient(90deg, #070707e8 0%, #070707b8 48%, #07070752 100%),
+        linear-gradient(0deg, var(--bg), transparent 35%),
+        url("assets/robot-and-sensor.png") center / cover no-repeat,
+        var(--bg);
     }
-    .hero > :first-child { padding: clamp(3rem, 7vw, 6rem) var(--gutter); background: linear-gradient(90deg, var(--bg) 55%, transparent); }
+    .hero > :first-child { padding: 4.25rem var(--gutter) 3.5rem; }
     .accent { color: var(--accent); }
     h1, h2, h3, p { margin: 0; }
     h1, h2, h3 { line-height: 1.05; letter-spacing: -.04em; }
-    h1 { font-size: clamp(2.4rem, 5.6vw, 5rem); }
+    h1 { font-size: clamp(2.25rem, 4.6vw, 4rem); line-height: .98; letter-spacing: -.035em; font-weight: 700; }
     h2 { font-size: clamp(1.85rem, 3vw, 2.5rem); margin-bottom: 1rem; }
     h3 { font-size: 1.25rem; letter-spacing: -.02em; }
     p { color: var(--muted); }
-    .lead { font-size: clamp(1.06rem, 1.8vw, 1.28rem); margin-block: 1.25rem 1.75rem; max-width: 33rem; }
+    .hero-question { margin: 1.375rem 0 0; max-width: 29ch; font-size: clamp(1.3rem, 2.25vw, 2rem); line-height: 1.15; }
+    .lead { font-size: 1rem; line-height: 1.7; margin-block: .9rem 1.5rem; max-width: 56ch; }
     .label, .tabs, .rate, code { font-family: var(--mono); }
     .label { display: block; color: var(--accent); font-size: .875rem; margin-bottom: .75rem; text-transform: uppercase; letter-spacing: .12em; }
     .button { display: inline-block; padding: .6rem .95rem; border: 1px solid var(--line); color: var(--text); text-decoration: none; font: 500 .875rem/1.5 var(--mono); }
@@ -62,24 +63,33 @@
     .primary:hover { color: var(--bg); background: var(--text); }
     .terminal { min-width: 0; background: var(--panel); border: 1px solid var(--line); overflow: hidden; margin: var(--gutter); }
     .tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+    .tabs [role="tablist"] { border-bottom: 0; }
     .tabs button { font: inherit; font-size: .875rem; color: var(--muted); background: transparent; border: 0; border-right: 1px solid var(--line); border-bottom: 2px solid transparent; padding: .7rem .9rem; cursor: pointer; }
     .tabs button[aria-selected="true"] { color: var(--text); background: var(--panel-alt); border-bottom-color: var(--solid); }
-    pre { margin: 0; padding: 1.25rem; overflow: auto; font-size: .875rem; }
+    .playback { margin-left: auto; border-right: 0; }
+    .terminal pre { margin: 0; padding: 1.25rem; overflow: auto; height: 21rem; font: .875rem/1.6 var(--mono); }
+    .code-line { display: inline-block; }
+    .terminal.is-playing [role="tabpanel"]:not([hidden]) .code-line {
+      animation: code-reveal 160ms steps(2, end) both;
+      animation-delay: calc(170ms + var(--row) * 90ms);
+    }
+    @keyframes code-reveal {
+      from { opacity: 0; clip-path: inset(0 100% 0 0); }
+      to { opacity: 1; clip-path: inset(0); }
+    }
+    @media (hover: hover) and (min-width: 861px) and (prefers-reduced-motion: no-preference) {
+      .terminal { transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); transform-origin: left center; transition: transform .65s cubic-bezier(.2, .7, .2, 1); }
+      .terminal:hover, .terminal:focus-within { transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .terminal.is-playing [role="tabpanel"]:not([hidden]) .code-line { animation: none; }
+    }
     pre strong { color: var(--accent); font-weight: 500; }
     .tabs button:focus-visible { outline-offset: -4px; }
-    pre span { color: var(--muted); }
+    .code-line > span { color: var(--muted); }
     .panel-link { display: block; padding: .75rem 1.25rem; border-top: 1px solid var(--line); font-size: .9rem; }
     section { padding: clamp(2.5rem, 5vw, 4rem) var(--gutter); border-top: 1px solid var(--line); }
     .intro { max-width: 51rem; }
-    .task-art {
-      display: block;
-      width: 100%;
-      max-height: 26rem;
-      object-fit: contain;
-      margin-top: 1.5rem;
-      border: 1px solid var(--line);
-      background: var(--bg);
-    }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
     .grid article { padding: 1.25rem; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); background: var(--panel); }
     .grid p { margin-top: .6rem; }
@@ -90,7 +100,16 @@
     tfoot { color: var(--accent); font-weight: 700; }
     .note { margin-top: 1rem; max-width: 53rem; font-size: .9rem; }
     .footer { color: var(--muted); font-size: .9rem; }
-    @media (max-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr); } .hero > :first-child { padding-bottom: 1rem; } }
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+        background:
+          linear-gradient(180deg, #070707c9, #070707a8 45%, var(--bg) 72%),
+          url("assets/robot-and-sensor.png") center top / auto 28rem no-repeat,
+          var(--bg);
+      }
+      .hero > :first-child { padding-block: 3rem 1rem; }
+    }
     @media (max-width: 420px) { .grid { grid-template-columns: 1fr; } th, td { padding-inline: .25rem; } }
   </style>
 </head>
@@ -105,65 +124,68 @@
     <div class="hero">
       <div>
         <h1>FirmwareGym<span class="accent" aria-hidden="true">.</span></h1>
-        <p class="lead">Build formally verifiable firmware with the <a href="https://h5i.dev/">h5i framework</a> and Lean 4. FirmwareGym gives AI agents a benchmark and reinforcement learning environment to prove firmware behavior and test it on virtual hardware with Renode.</p>
+        <h2 class="hero-question">Can AI build and formally verify high-performance firmware?</h2>
+        <p class="lead">FirmwareGym challenges AI agents to build firmware with the <a href="https://h5i.dev/">h5i framework</a>, prove its behavior in Lean 4, and meet resource budgets on virtual hardware in Renode.</p>
         <div class="links">
           <a class="button primary" href="#tasks">Explore the sample tasks</a>
           <a class="button" href="https://github.com/h5i-dev/FirmwareGym-Public">View on GitHub</a>
         </div>
       </div>
       <div class="terminal">
-        <div class="tabs" role="tablist" aria-label="NOR flash task preview">
+        <div class="tabs">
+          <div class="tabs" role="tablist" aria-label="NOR flash task preview">
           <button id="tab-crash" type="button" role="tab" aria-controls="crash" aria-selected="true">Power cut</button>
           <button id="tab-rust" type="button" role="tab" aria-controls="rust" aria-selected="false" tabindex="-1">Rust</button>
           <button id="tab-lean" type="button" role="tab" aria-controls="lean" aria-selected="false" tabindex="-1">Lean</button>
+          </div>
+          <button class="playback" type="button" hidden>Pause</button>
         </div>
         <div id="crash" role="tabpanel" aria-labelledby="tab-crash" tabindex="0">
-          <pre><code><span># NOR flash · illustrative batch</span>
-STAGE_PUT     A = 42
-STAGE_DELETE  B
-COMMIT
-<strong>POWER CUT</strong>     <span># before commit reply</span>
-BOOT
-
-<strong>Valid recovery</strong>
-  Old map     A = 7,  B = 9
-  New map     A = 42, B absent
-
-<span># A second reboot recovers the same map.</span></code></pre>
+          <pre><code><span class="code-line" style="--row:0"><span># NOR flash · illustrative batch</span></span>
+<span class="code-line" style="--row:1">STAGE_PUT     A = 42</span>
+<span class="code-line" style="--row:2">STAGE_DELETE  B</span>
+<span class="code-line" style="--row:3">COMMIT</span>
+<span class="code-line" style="--row:4"><strong>POWER CUT</strong>     <span># before commit reply</span></span>
+<span class="code-line" style="--row:5">BOOT</span>
+<span class="code-line" style="--row:6"> </span>
+<span class="code-line" style="--row:7"><strong>Valid recovery</strong></span>
+<span class="code-line" style="--row:8">  Old map     A = 7,  B = 9</span>
+<span class="code-line" style="--row:9">  New map     A = 42, B absent</span>
+<span class="code-line" style="--row:10"> </span>
+<span class="code-line" style="--row:11"><span># A second reboot recovers the same map.</span></span></code></pre>
           <a class="panel-link" href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">Read the NOR flash task</a>
         </div>
         <div id="rust" role="tabpanel" aria-labelledby="tab-rust" tabindex="0" hidden>
-          <pre><code><strong>#![no_std]</strong>
-
-<span>// Starter excerpt</span>
-pub fn transition(
-    _state: &amp;State,
-    _input: &amp;Inputs,
-) -&gt; (State, Outputs) {
-    (
-        INITIAL,
-        Outputs { a: 0, b: -1, c: 0, d: 0 },
-    )
-}</code></pre>
+          <pre><code><span class="code-line" style="--row:0"><strong>#![no_std]</strong></span>
+<span class="code-line" style="--row:1"> </span>
+<span class="code-line" style="--row:2"><span>// Starter excerpt</span></span>
+<span class="code-line" style="--row:3">pub fn transition(</span>
+<span class="code-line" style="--row:4">    _state: &amp;State,</span>
+<span class="code-line" style="--row:5">    _input: &amp;Inputs,</span>
+<span class="code-line" style="--row:6">) -&gt; (State, Outputs) {</span>
+<span class="code-line" style="--row:7">    (</span>
+<span class="code-line" style="--row:8">        INITIAL,</span>
+<span class="code-line" style="--row:9">        Outputs { a: 0, b: -1, c: 0, d: 0 },</span>
+<span class="code-line" style="--row:10">    )</span>
+<span class="code-line" style="--row:11">}</span></code></pre>
           <a class="panel-link" href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/flash_kv_nor_starter/starter/src/lib.rs">View the Rust starter</a>
         </div>
         <div id="lean" role="tabpanel" aria-labelledby="tab-lean" tabindex="0" hidden>
-          <pre><code><span>-- Atomic recovery obligation, excerpt</span>
-
-boot medium = some recovered ∧
-observe recovered allKeys = some values ∧
-<strong>(values = oldKeys ∨ values = newKeys)</strong> ∧
-boot recovered.2 = some again ∧
-observe again allKeys = some values</code></pre>
+          <pre><code><span class="code-line" style="--row:0"><span>-- Atomic recovery obligation, excerpt</span></span>
+<span class="code-line" style="--row:1"> </span>
+<span class="code-line" style="--row:2">boot medium = some recovered ∧</span>
+<span class="code-line" style="--row:3">observe recovered allKeys = some values ∧</span>
+<span class="code-line" style="--row:4"><strong>(values = oldKeys ∨ values = newKeys)</strong> ∧</span>
+<span class="code-line" style="--row:5">boot recovered.2 = some again ∧</span>
+<span class="code-line" style="--row:6">observe again allKeys = some values</span></code></pre>
           <a class="panel-link" href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/flash_kv_nor_starter/proofs/Submission.lean">View the Lean proof template</a>
         </div>
       </div>
     </div>
 
     <section id="tasks">
-      <h2>From circuit breakers to crash recovery</h2>
-      <p class="intro">The hosted catalog spans L1–L5, with tasks in control, storage, communication, scheduling, sensor fusion, embedded virtual machines, and robot coordination.</p>
-      <img class="task-art" src="assets/robot-and-sensor.png" width="1752" height="897" loading="lazy" decoding="async" alt="Technical illustration of a warehouse rover and a sensor circuit board">
+      <h2>What does the firmware have to prove?</h2>
+      <p class="intro">Can a store recover a whole transaction after a power cut? Will a relay open if overcurrent and a reset request arrive in the same step? Try both challenges with the public starters and Lean proof obligations.</p>
       <div class="grid">
         <article>
           <span class="label">L4 public sample</span>
@@ -224,8 +246,45 @@ observe again allKeys = some values</code></pre>
     <div class="wrap footer"><a class="brand" href="./index.html">FirmwareGym</a><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/LICENSE">Apache 2.0</a></div>
   </footer>
   <script>
-    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+    const terminal = document.querySelector('.terminal');
+    const tabs = Array.from(terminal.querySelectorAll('[role="tab"]'));
+    const playback = terminal.querySelector('.playback');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let activeIndex = 0;
+    let replayTimer;
+
+    function pauseReplay() {
+      clearTimeout(replayTimer);
+      terminal.classList.remove('is-playing');
+      playback.textContent = 'Play';
+    }
+
+    function playReplay() {
+      terminal.classList.add('is-playing');
+      playback.textContent = 'Pause';
+      selectTab(tabs[activeIndex]);
+      replayTimer = setTimeout(() => {
+        activeIndex = (activeIndex + 1) % tabs.length;
+        playReplay();
+      }, 3400);
+    }
+
+    function updateMotionPreference() {
+      pauseReplay();
+      playback.hidden = reducedMotion.matches;
+      if (!reducedMotion.matches && !terminal.matches(':focus-within')) playReplay();
+    }
+
+    playback.addEventListener('click', () => {
+      if (terminal.classList.contains('is-playing')) pauseReplay();
+      else playReplay();
+    });
+    terminal.addEventListener('focusin', event => {
+      if (event.target !== playback) pauseReplay();
+    });
+    reducedMotion.addEventListener('change', updateMotionPreference);
     function selectTab(selected) {
+      activeIndex = tabs.indexOf(selected);
       for (const tab of tabs) {
         const active = tab === selected;
         tab.setAttribute('aria-selected', String(active));
@@ -234,7 +293,10 @@ observe again allKeys = some values</code></pre>
       }
     }
     for (const [index, tab] of tabs.entries()) {
-      tab.addEventListener('click', () => selectTab(tab));
+      tab.addEventListener('click', () => {
+        pauseReplay();
+        selectTab(tab);
+      });
       tab.addEventListener('keydown', event => {
         const nextIndex = {
           ArrowLeft: (index - 1 + tabs.length) % tabs.length,
@@ -244,10 +306,12 @@ observe again allKeys = some values</code></pre>
         }[event.key];
         if (nextIndex === undefined) return;
         event.preventDefault();
+        pauseReplay();
         selectTab(tabs[nextIndex]);
         tabs[nextIndex].focus();
       });
     }
+    updateMotionPreference();
   </script>
 </body>
 </html>
