@@ -47,8 +47,8 @@
     .nav-links { gap: clamp(.75rem, 2vw, 1.375rem); list-style: none; margin: 0; padding: 0; }
     .nav-links a {
       color: var(--muted);
-      font: .875rem/1.4 var(--mono);
-      letter-spacing: .09em;
+      font: 400 11px/1.4 var(--mono);
+      letter-spacing: .14em;
       text-transform: uppercase;
       text-decoration: none;
       white-space: nowrap;
@@ -57,6 +57,8 @@
       transition: color .15s, background-size .25s ease;
     }
     .nav-links a:hover, .nav-links a:focus-visible { color: var(--text); background-size: 100% 1px; }
+    .nav-links .nav-cta { display: inline-block; padding: 7px 15px; border: 1px solid var(--line); color: var(--text); background: none; }
+    .nav-links .nav-cta:hover, .nav-links .nav-cta:focus-visible { background: var(--solid); border-color: var(--solid); color: white; }
     .links { flex-wrap: wrap; gap: .8rem 1.25rem; }
     main section[id] { scroll-margin-top: 60px; }
     @media (max-width: 650px) {
@@ -137,6 +139,7 @@
         <li><a href="#tasks">Tasks</a></li>
         <li><a href="#results">Results</a></li>
         <li><a href="#start">Get started</a></li>
+        <li><a class="nav-cta" href="https://github.com/h5i-dev/FirmwareGym-Public">GitHub <span aria-hidden="true">&rarr;</span></a></li>
       </ul>
     </nav>
   </header>
