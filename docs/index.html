@@ -61,6 +61,8 @@
     .overview-list li + li { margin-top: .65rem; }
     .overview-list li::marker { color: var(--accent); }
     .overview-list strong { color: var(--text); }
+    .samples { margin-top: 1.5rem; }
+    .samples .overview-list { margin-top: .75rem; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
     .grid article { padding: 1.25rem; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); background: var(--panel); }
     .grid p { margin-top: .6rem; }
@@ -82,7 +84,7 @@
   <header>
     <nav class="wrap" aria-label="Main navigation">
       <div class="identity"><a class="parent-brand" href="https://h5i.dev/">h5i</a><a class="brand" href="./index.html">FirmwareGym</a></div>
-      <div><a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#samples">Samples</a><a href="#results">Results</a><a href="#start">Get started</a></div>
+      <div><a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#results">Results</a><a href="#start">Get started</a></div>
     </nav>
   </header>
   <main class="wrap">
@@ -115,14 +117,13 @@
         <li><strong>Optimize performance.</strong> Run the compiled firmware through Renode scenarios and use CPU instruction counts, binary size, RAM usage, and peak stack usage to guide optimization.</li>
       </ul>
       <p class="note"><strong>The full dataset and task catalog are currently private.</strong> Hosted access to the full catalog requires an API key.</p>
-    </section>
-
-    <section id="samples">
-      <h2>Samples</h2>
-      <ul class="overview-list">
-        <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">Overcurrent Trip Latch</a> opens a relay at 5 A or above, even during a reset request.</li>
-        <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">Crash-consistent NOR flash store</a> recovers either the entire old map or the entire new map after a power cut.</li>
-      </ul>
+      <div id="samples" class="samples">
+        <h3>Samples</h3>
+        <ul class="overview-list">
+          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">Overcurrent Trip Latch</a> opens a relay at 5 A or above, even during a reset request.</li>
+          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">Crash-consistent NOR flash store</a> recovers either the entire old map or the entire new map after a power cut.</li>
+        </ul>
+      </div>
     </section>
 
     <section id="results">
