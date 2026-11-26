@@ -30,13 +30,42 @@
     a:hover { color: white; }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
     .wrap { width: min(90rem, 100%); margin-inline: auto; border-inline: 1px solid var(--line); }
-    header, footer { border-block: 1px solid var(--line); }
-    nav, .footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1rem var(--gutter); }
-    nav div, .links { display: flex; align-items: center; flex-wrap: wrap; gap: .8rem 1.25rem; }
-    .brand, .parent-brand { font: 600 1rem var(--mono); text-decoration: none; }
-    nav .identity { gap: .75rem; }
-    .identity .parent-brand { color: var(--accent); border-right: 1px solid var(--line); padding-right: .75rem; }
-    nav div a { color: var(--text); font: .875rem var(--mono); }
+    header { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line); background: var(--bg); }
+    @supports (backdrop-filter: blur(14px)) {
+      header { background: #070707e0; backdrop-filter: blur(14px) saturate(140%); }
+    }
+    footer { border-block: 1px solid var(--line); }
+    .site-nav, .footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-inline: var(--gutter); }
+    .site-nav { min-height: 59px; }
+    .footer { flex-wrap: wrap; padding-block: 1rem; }
+    .brand { font: 600 1rem var(--mono); text-decoration: none; }
+    .identity, .nav-links, .links { display: flex; align-items: center; }
+    .identity { gap: .625rem; }
+    .parent-brand { display: flex; flex: none; }
+    .site-nav .brand { color: var(--text); font: 700 1.1875rem/1 var(--sans); letter-spacing: -.03em; }
+    .site-nav .brand::after { content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 5px; background: var(--solid); vertical-align: middle; }
+    .nav-links { gap: clamp(.75rem, 2vw, 1.375rem); list-style: none; margin: 0; padding: 0; }
+    .nav-links a {
+      color: var(--muted);
+      font: .875rem/1.4 var(--mono);
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+      background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+      padding-bottom: 3px;
+      transition: color .15s, background-size .25s ease;
+    }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--text); background-size: 100% 1px; }
+    .links { flex-wrap: wrap; gap: .8rem 1.25rem; }
+    main section[id] { scroll-margin-top: 60px; }
+    @media (max-width: 650px) {
+      header { position: static; }
+      .site-nav { align-items: flex-start; flex-direction: column; justify-content: center; gap: .875rem; padding-block: .875rem; }
+      .nav-links { flex-wrap: wrap; }
+      main section[id] { scroll-margin-top: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { .nav-links a { transition: none; } }
     .hero {
       display: grid;
       grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
@@ -98,9 +127,17 @@
 </head>
 <body>
   <header>
-    <nav class="wrap" aria-label="Main navigation">
-      <div class="identity"><a class="parent-brand" href="https://h5i.dev/">h5i</a><a class="brand" href="./index.html">FirmwareGym</a></div>
-      <div><a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#results">Results</a><a href="#start">Get started</a></div>
+    <nav class="wrap site-nav" aria-label="Main navigation">
+      <div class="identity">
+        <a class="parent-brand" href="https://h5i.dev/" aria-label="h5i home"><img src="assets/h5i-logo.png" width="24" height="24" alt=""></a>
+        <a class="brand" href="./index.html" aria-current="page">FirmwareGym</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#tasks">Tasks</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#start">Get started</a></li>
+      </ul>
     </nav>
   </header>
   <main class="wrap">
