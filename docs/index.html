@@ -66,11 +66,13 @@
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
     .grid article { padding: 1.25rem; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); background: var(--panel); }
     .grid p { margin-top: .6rem; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; text-align: left; }
+    .table-scroll { margin-top: 1.5rem; overflow-x: auto; }
+    table { width: 100%; min-width: 55rem; border-collapse: collapse; text-align: left; }
     th, td { border-bottom: 1px solid var(--line); padding: .72rem .5rem; }
     thead { color: var(--muted); }
     td:nth-child(n+2), thead th:nth-child(n+2) { text-align: right; }
-    tfoot { color: var(--accent); font-weight: 700; }
+    .rate span { display: block; color: var(--muted); font-size: .875rem; }
+    .overall { color: var(--accent); font-weight: 700; }
     .note { margin-top: 1rem; max-width: 53rem; font-size: .9rem; }
     .footer { color: var(--muted); font-size: .9rem; }
     @media (max-width: 860px) {
@@ -91,7 +93,7 @@
     <div class="hero">
       <div class="hero-copy">
         <h1>FirmwareGym<span class="accent" aria-hidden="true">.</span></h1>
-        <p class="lead">FirmwareGym challenges AI agents to build firmware with the <a href="https://h5i.dev/">h5i framework</a>, prove its behavior in Lean 4, and meet resource budgets on virtual hardware in Renode.</p>
+        <p class="lead">FirmwareGym challenges AI agents to build firmware with the <a href="https://h5i.dev/">h5i framework</a>, prove its behavior in Lean 4, and optimize performance on virtual hardware in Renode.</p>
         <div class="links">
           <a class="button primary" href="#samples">Explore the sample tasks</a>
           <a class="button" href="https://github.com/h5i-dev/FirmwareGym-Public">View on GitHub</a>
@@ -114,7 +116,7 @@
       <p class="intro">FirmwareGym spans five difficulty levels. Tasks include coordinating warehouse robots, fusing noisy or faulty sensor readings, controlling motors and batteries, scheduling real-time jobs, and storing data on NOR flash.</p>
       <ul class="overview-list">
         <li><strong>Prove implementation correctness.</strong> Use Lean 4 to prove task-specific properties such as collision-free robot deliveries or recovery of an entire transaction after a power cut.</li>
-        <li><strong>Optimize performance.</strong> Run the compiled firmware through Renode scenarios and use CPU instruction counts, binary size, RAM usage, and peak stack usage to guide optimization.</li>
+        <li><strong>Optimize performance.</strong> Run the compiled firmware through Renode scenarios. Use the raw CPU instruction counts, binary size, RAM usage, and peak stack measurements to guide optimization or define a custom reward. The default reward uses task-specific resource budgets.</li>
       </ul>
       <div id="samples" class="samples">
         <p class="intro">The full dataset and task catalog are currently private, and hosted access requires an API key. Two sample tasks are publicly available:</p>
@@ -126,22 +128,37 @@
     </section>
 
     <section id="results">
-      <span class="label">Opus 5.5 baseline</span>
-      <h2 id="pass-rate">Task pass rate by domain</h2>
-      <p class="intro">11 of 18 tasks passed the final evaluation.</p>
-      <table aria-labelledby="pass-rate" aria-describedby="method">
-        <thead><tr><th scope="col">Domain</th><th scope="col">Passed / attempted</th><th scope="col">Pass rate</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Control, power &amp; safety</th><td class="rate">7 / 7</td><td class="rate">100%</td></tr>
-          <tr><th scope="row">Storage</th><td class="rate">1 / 2</td><td class="rate">50%</td></tr>
-          <tr><th scope="row">Communication</th><td class="rate">1 / 3</td><td class="rate">33%</td></tr>
-          <tr><th scope="row">Sensor fusion</th><td class="rate">1 / 2</td><td class="rate">50%</td></tr>
-          <tr><th scope="row">Scheduling &amp; virtual machines</th><td class="rate">1 / 3</td><td class="rate">33%</td></tr>
-          <tr><th scope="row">Robot coordination</th><td class="rate">0 / 1</td><td class="rate">0%</td></tr>
-        </tbody>
-        <tfoot><tr><th scope="row">Overall</th><td class="rate">11 / 18</td><td class="rate">61%</td></tr></tfoot>
-      </table>
-      <p class="note" id="method">One agent run per task, with up to 30 minutes and iterative development feedback. The final grader required successful compilation, all Lean obligations and Renode scenarios, any applicable randomized checks, and all resource budgets. A task fails if proof checking cannot complete. Lean thread creation failed during kernel replay for one communication task, and Lean ran out of memory during elaboration for one robot coordination task. Percentages use all attempted tasks and are rounded to whole numbers.</p>
+      <h2 id="baseline">Public Baseline</h2>
+      <p class="intro">Final evaluation pass rates by domain. Each cell shows the percentage and the number of tasks passed out of those attempted.</p>
+      <div class="table-scroll" role="region" aria-label="Baseline results by model and domain" tabindex="0">
+        <table aria-labelledby="baseline" aria-describedby="method">
+          <thead>
+            <tr>
+              <th scope="col">Model</th>
+              <th scope="col">Control, power &amp; safety</th>
+              <th scope="col">Storage</th>
+              <th scope="col">Communication</th>
+              <th scope="col">Sensor fusion</th>
+              <th scope="col">Scheduling &amp; virtual machines</th>
+              <th scope="col">Robot coordination</th>
+              <th scope="col">Overall</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Claude Opus 5.5</th>
+              <td class="rate">100% <span>7 / 7</span></td>
+              <td class="rate">50% <span>1 / 2</span></td>
+              <td class="rate">33% <span>1 / 3</span></td>
+              <td class="rate">50% <span>1 / 2</span></td>
+              <td class="rate">33% <span>1 / 3</span></td>
+              <td class="rate">0% <span>0 / 1</span></td>
+              <td class="rate overall">61% <span>11 / 18</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note" id="method">One agent run per task, with up to 30 minutes and iterative development feedback. The final grader required successful compilation, all Lean obligations and Renode scenarios, any applicable randomized checks, and all resource budgets.</p>
     </section>
 
     <section id="start">
