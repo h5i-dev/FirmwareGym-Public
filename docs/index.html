@@ -104,7 +104,53 @@
     .workflow-branch strong { display: block; line-height: 1.25; }
     .workflow-branch span { display: block; margin-top: .4rem; color: var(--muted); font-size: .875rem; }
     .samples { margin-top: 1.5rem; }
-    .samples .overview-list { margin-top: .75rem; }
+    .sample-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: .75rem; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+    .sample-card {
+      --light-x: 50%;
+      --light-y: 50%;
+      position: relative;
+      isolation: isolate;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      padding: 1.625rem var(--gutter) 1.375rem;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .sample-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: 0;
+      background: radial-gradient(380px circle at var(--light-x) var(--light-y), #e0241b29, transparent 62%);
+      transition: opacity .3s;
+    }
+    .sample-card::after {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 2px;
+      background: var(--solid);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform .45s cubic-bezier(.2, .7, .2, 1);
+    }
+    .sample-card:is(:hover, :focus-visible)::before { opacity: 1; }
+    .sample-card:is(:hover, :focus-visible)::after { transform: none; }
+    .sample-card, .sample-card:hover { color: var(--text); text-decoration: none; }
+    .sample-card h3 { font-weight: 600; line-height: 1.15; }
+    .sample-card p { flex: 1; }
+    .sample-number, .sample-footer { color: var(--muted); font: .875rem/1.4 var(--mono); }
+    .sample-footer { display: flex; align-items: center; justify-content: space-between; padding-top: .875rem; border-top: 1px dashed var(--line); }
+    .sample-arrow { font-size: 1.125rem; transition: transform .3s cubic-bezier(.2, .7, .2, 1), color .2s; }
+    .sample-card:is(:hover, :focus-visible) .sample-arrow { color: var(--accent); transform: translate(3px, -3px); }
+    .sample-card:focus-visible { outline-offset: -2px; }
+    @media (max-width: 650px) { .sample-grid { grid-template-columns: minmax(0, 1fr); } }
+    @media (prefers-reduced-motion: reduce) {
+      .sample-card::before, .sample-card::after, .sample-arrow { transition: none; }
+      .sample-card:is(:hover, :focus-visible) .sample-arrow { transform: none; }
+    }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
     .grid article { padding: 1.25rem; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); background: var(--panel); }
     .grid p { margin-top: .6rem; }
@@ -191,10 +237,20 @@
       </div>
       <div id="samples" class="samples">
         <p class="intro">The full dataset and task catalog are currently private, and hosted access requires an API key. Two sample tasks are publicly available:</p>
-        <ul class="overview-list">
-          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">(Sample - 1) Overcurrent Trip Latch</a>. Implement a relay that trips when the current reaches 5 A. Prove in Lean 4 that overcurrent takes priority over a simultaneous reset and that, across any sequence of inputs, the relay stays open after a trip until a reset is requested at a safe current.</li>
-          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">(Sample - 2) Crash-consistent NOR flash store</a>. Implement a key-value store that commits batches of updates to NOR flash. Prove in Lean 4 that commits survive reboot and interrupted batches recover atomically, even across repeated reboots.</li>
-        </ul>
+        <div class="sample-grid">
+          <a class="sample-card" href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter" aria-labelledby="sample-title-1" aria-describedby="sample-description-1">
+            <span class="sample-number">Sample - 1</span>
+            <h3 id="sample-title-1">Overcurrent Trip Latch</h3>
+            <p id="sample-description-1">Implement a relay that trips when the current reaches 5 A. Prove in Lean 4 that overcurrent takes priority over a simultaneous reset and that, across any sequence of inputs, the relay stays open after a trip until a reset is requested at a safe current.</p>
+            <span class="sample-footer" aria-hidden="true">View on GitHub <span class="sample-arrow">↗</span></span>
+          </a>
+          <a class="sample-card" href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter" aria-labelledby="sample-title-2" aria-describedby="sample-description-2">
+            <span class="sample-number">Sample - 2</span>
+            <h3 id="sample-title-2">Crash-consistent NOR flash store</h3>
+            <p id="sample-description-2">Implement a key-value store that commits batches of updates to NOR flash. Prove in Lean 4 that commits survive reboot and interrupted batches recover atomically, even across repeated reboots.</p>
+            <span class="sample-footer" aria-hidden="true">View on GitHub <span class="sample-arrow">↗</span></span>
+          </a>
+        </div>
       </div>
     </section>
 
@@ -246,5 +302,36 @@
   <footer>
     <div class="wrap footer"><a class="brand" href="./index.html">FirmwareGym</a><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/LICENSE">Apache 2.0</a></div>
   </footer>
+  <script>
+    const sampleCards = document.querySelectorAll('.sample-card');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    for (const card of sampleCards) {
+      card.addEventListener('pointermove', event => {
+        if (reducedMotion.matches || event.pointerType === 'touch') return;
+        const bounds = card.getBoundingClientRect();
+        card.style.setProperty('--light-x', `${event.clientX - bounds.left}px`);
+        card.style.setProperty('--light-y', `${event.clientY - bounds.top}px`);
+      });
+    }
+
+    if (!reducedMotion.matches && 'IntersectionObserver' in window && 'animate' in Element.prototype) {
+      const reveal = new IntersectionObserver(entries => {
+        let delay = 0;
+        for (const { target, isIntersecting } of entries) {
+          if (!isIntersecting) continue;
+          reveal.unobserve(target);
+          if (reducedMotion.matches || target.matches(':focus-within')) continue;
+          const animation = target.animate(
+            [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+            { duration: 600, delay, fill: 'backwards', easing: 'cubic-bezier(.2, .7, .2, 1)' }
+          );
+          target.addEventListener('focus', () => animation.cancel(), { once: true });
+          delay += 70;
+        }
+      }, { threshold: 0.1 });
+      for (const card of sampleCards) reveal.observe(card);
+    }
+  </script>
 </body>
 </html>
