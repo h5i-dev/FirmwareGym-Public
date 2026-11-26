@@ -15,7 +15,7 @@ All raw evaluation metrics are accessible through the SDK, allowing researchers 
 
 ## 2. Tasks
 
-FirmwareGym aims to provide over 100 realistic firmware engineering tasks across five difficulty levels (L1–L5), ranging from basic device controllers to complex, fault-tolerant embedded systems.
+The hosted catalog spans five difficulty levels (L1–L5), from single-device controllers to fault-tolerant embedded logic. Use `gym.list_tasks()` to discover the tasks available to your API key.
 
 Examples of tasks include:
 
@@ -24,12 +24,12 @@ Examples of tasks include:
 | Battery Management System | Thermal protection, voltage monitoring, fault recovery |
 | Crash-Consistent Flash Storage | Power failures, atomic updates, garbage collection, wear leveling |
 | Reliable Communication Protocol | Packet loss, reordering, duplicate execution, reboots |
-| Real-Time Scheduler | Deadline satisfaction, resource contention, interrupt handling |
+| Real-Time Scheduler | Admission control, scheduling decisions, deadline tracking |
 | Robust Sensor Fusion | Byzantine sensor faults, measurement noise, uncertainty |
 | Embedded Virtual Machine | Operational semantics, capability isolation, execution metering |
 | Autonomous Warehouse Robots | Multi-agent coordination, collision avoidance, energy management |
 
-Each task defines formal specifications, simulation scenarios, resource budgets, and performance baselines. Selected sample tasks are publicly available, while the full task collection, reference implementations, and hidden evaluation specifications remain private.
+The task API provides the README, Rust starter, public Lean specification, fixed theorem obligations, Renode scenario, and resource budgets. This repository includes the Overcurrent Trip sample. The hosted public grader returns development feedback. Organizers run final evaluation separately.
 
 ## 3. Getting Started
 
@@ -45,29 +45,29 @@ pip install "git+https://github.com/h5i-dev/FirmwareGym-Public.git#subdirectory=
 
 ### 3.2. Firmware Evaluation
 
+Set `FIRMWAREGYM_URL` and `FIRMWAREGYM_API_KEY` to the endpoint and key provided by your operator. Implement the Rust starter, then fill the corresponding Lean proof template in `proofs/Submission.lean`.
+
 ```python
+import os
+from pathlib import Path
 from firmwaregym import FirmwareGym
 
-gym = FirmwareGym(
-    "https://api.example.com",
-    api_key="fg_live_..."
-)
-
-# Browse available tasks
-tasks = gym.list_tasks(level="L4")
+gym = FirmwareGym(os.environ["FIRMWAREGYM_URL"])
 task = gym.get_task("overcurrent-trip")
 
-# Submit firmware for evaluation
 result = gym.evaluate_async(
     task.id,
-    files={"src/lib.rs": rust_source}
+    files={"src/lib.rs": Path("src/lib.rs").read_text()},
+    proof=Path("proofs/Submission.lean").read_text(),
 )
 
-print("Formal verification:", result.formal.passed, "/", result.formal.total)
-print("Simulation:", result.simulation.passed, "/", result.simulation.total)
-print("Performance:", result.metrics)
+print("Renode:", result.simulation.passed, "/", result.simulation.total)
+for obligation in result.obligations:
+    print(obligation.id, obligation.status, obligation.feedback)
 print("Reward:", result.reward)
 ```
+
+Submit without `proof` to test the Rust implementation in Renode. Use the REST proof path for joint Rust and Lean evaluation.
 
 ### 3.3. Reinforcement Learning with OpenEnv
 
@@ -104,7 +104,7 @@ def custom_reward(ev: Evaluation) -> float:
     if not ev.compiled:
         return 0.0
 
-    if ev.formal.passed < ev.formal.total:
+    if ev.formal.total == 0 or ev.formal.passed < ev.formal.total:
         return 0.0
 
     if ev.simulation.passed < ev.simulation.total:

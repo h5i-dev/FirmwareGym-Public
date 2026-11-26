@@ -1,3 +1,5 @@
+import Firmware
+
 -- Specification owned by FirmwareGym. The kernel obligations live in Theorems.lean.
 
 namespace OvercurrentSpec
@@ -27,5 +29,25 @@ theorem safe_armed_closes_relay :
     relayClosed 0 1200 0 = 1 := by
   unfold relayClosed nextTripped thresholdMa
   decide
+
+open Aeneas Aeneas.Std Result firmware
+
+abbrev Observation := Int × Int × Int × Int
+
+def stepModel (tripped : Int) (i : Inputs) : Int × Observation :=
+  let trip := nextTripped tripped i.a.val i.b.val
+  (trip, (if trip = 0 then 1 else 0, trip, 0, 0))
+def modelTrace (s : Int) : List Inputs → List Observation
+  | [] => []
+  | i :: rest =>
+    let (next, out) := stepModel s i
+    out :: modelTrace next rest
+
+def observedTrace (s : State) : List Inputs → Result (List Observation)
+  | [] => ok []
+  | i :: rest => do
+    let (next, out) ← transition s i
+    let after ← observedTrace next rest
+    ok ((out.a.val, out.b.val, out.c.val, out.d.val) :: after)
 
 end OvercurrentSpec

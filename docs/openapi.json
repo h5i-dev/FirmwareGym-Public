@@ -1,5 +1,167 @@
 {
   "components": {
+    "schemas": {
+      "Evaluation": {
+        "properties": {
+          "budgets": {
+            "type": "object"
+          },
+          "compiled": {
+            "type": "boolean"
+          },
+          "formal": {
+            "$ref": "#/components/schemas/Section"
+          },
+          "fuzz": {
+            "$ref": "#/components/schemas/Section"
+          },
+          "fuzz_run": {
+            "properties": {
+              "elapsed_ms": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "max_step_instructions": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "peak_stack_bytes": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "held_out": {
+            "$ref": "#/components/schemas/Section"
+          },
+          "obligations": {
+            "items": {
+              "$ref": "#/components/schemas/ObligationResult"
+            },
+            "type": "array"
+          },
+          "provenance": {
+            "description": "Task and source hashes, evaluation scope, and configured build and sandbox settings.",
+            "type": "object"
+          },
+          "reward": {
+            "type": "object"
+          },
+          "simulation": {
+            "$ref": "#/components/schemas/Section"
+          }
+        },
+        "required": [
+          "compiled",
+          "formal",
+          "simulation",
+          "budgets",
+          "reward"
+        ],
+        "type": "object"
+      },
+      "EvaluationJob": {
+        "properties": {
+          "created_at": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "finished_at": {
+            "type": "integer"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/Evaluation"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "canceling",
+              "completed",
+              "failed",
+              "canceled"
+            ],
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id",
+          "task_id",
+          "status",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "ObligationResult": {
+        "properties": {
+          "feedback": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "proved",
+              "unproved",
+              "not_checked"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "feedback"
+        ],
+        "type": "object"
+      },
+      "ProofModule": {
+        "description": "One Lean source file (maximum 256 KiB UTF-8). Prove each task obligation as FirmwareGymSubmission.<id>; helpers can share the file.",
+        "maxLength": 262144,
+        "minLength": 1,
+        "type": "string"
+      },
+      "Section": {
+        "properties": {
+          "feedback": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "passed": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "total": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "passed",
+          "total",
+          "feedback"
+        ],
+        "type": "object"
+      }
+    },
     "securitySchemes": {
       "ApiKeyAuth": {
         "in": "header",
@@ -13,7 +175,7 @@
     }
   },
   "info": {
-    "description": "Verified & resource-efficient embedded firmware benchmark API. Public endpoints evaluate against public specs only; hidden specs and adversarial fuzzers run on operator pipelines.",
+    "description": "Verified & resource-efficient embedded firmware benchmark API. Submitted proofs use public contracts. Public evaluation uses the public scenarios. Final evaluation is operator-only.",
     "title": "FirmwareGym Evaluation API",
     "version": "0.2.0"
   },
@@ -76,7 +238,36 @@
       }
     },
     "/v1/jobs": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EvaluationJob"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Jobs ordered by most recent first"
+          }
+        },
+        "summary": "List jobs owned by the caller"
+      },
       "post": {
+        "parameters": [
+          {
+            "description": "Replays the same request for this tenant while the job is retained",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "schema": {
+              "maxLength": 128,
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -88,6 +279,9 @@
                       "type": "string"
                     },
                     "type": "object"
+                  },
+                  "proof": {
+                    "$ref": "#/components/schemas/ProofModule"
                   },
                   "task_id": {
                     "type": "string"
@@ -105,6 +299,13 @@
         },
         "responses": {
           "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationJob"
+                }
+              }
+            },
             "description": "Job accepted and queued"
           },
           "400": {
@@ -112,6 +313,9 @@
           },
           "404": {
             "description": "Unknown task"
+          },
+          "409": {
+            "description": "Idempotency key already used with a different request"
           },
           "429": {
             "description": "Rate limit, per-tenant concurrency cap, or monthly quota exceeded"
@@ -124,6 +328,40 @@
       }
     },
     "/v1/jobs/{job_id}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationJob"
+                }
+              }
+            },
+            "description": "Canceled, or canceling while subprocess cleanup is in progress"
+          },
+          "404": {
+            "description": "Unknown job"
+          },
+          "409": {
+            "description": "Job has already finished"
+          },
+          "503": {
+            "description": "Could not persist cancellation"
+          }
+        },
+        "summary": "Cancel a queued or running job owned by the caller"
+      },
       "get": {
         "parameters": [
           {
@@ -137,7 +375,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Job status and optional Evaluation payload"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationJob"
+                }
+              }
+            },
+            "description": "Job status and optional evaluation with obligation verdicts"
           },
           "404": {
             "description": "Unknown job"
@@ -205,7 +450,7 @@
             "description": "Unknown task"
           }
         },
-        "summary": "Fetch task README, starter Rust crate, public Lean 4 spec, budgets, optimization metrics, and public simulation scenario"
+        "summary": "Fetch task README, starter Rust crate, public Lean 4 spec, fixed obligation declarations, budgets, optimization metrics, and public simulation scenario"
       }
     },
     "/v1/tasks/{id}/evaluate": {
@@ -231,6 +476,9 @@
                       "type": "string"
                     },
                     "type": "object"
+                  },
+                  "proof": {
+                    "$ref": "#/components/schemas/ProofModule"
                   }
                 },
                 "required": [
@@ -244,7 +492,14 @@
         },
         "responses": {
           "200": {
-            "description": "Evaluation result (`compiled`, `formal`, `simulation`, `metrics` [`binary_bytes`, `static_ram_bytes`, `state_bytes`, `peak_stack_bytes`, `total_ram_bytes`, `executed_instructions`, `max_step_instructions`, `avg_step_instructions`, `signals`], `budgets`, `performance`, `reward`)"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Evaluation"
+                }
+              }
+            },
+            "description": "Public evaluation and per-obligation verdicts when Lean was submitted"
           },
           "400": {
             "description": "Rejected submission (invalid paths, size, `unsafe`/`extern`, or forbidden macros; does not consume quota)"
@@ -259,7 +514,7 @@
             "description": "Global evaluation queue is full (`Retry-After` header set)"
           }
         },
-        "summary": "Synchronously compile and evaluate a Rust firmware submission against public specs"
+        "summary": "Synchronously evaluate Rust and an optional Lean proof module against public specs"
       }
     },
     "/ws": {

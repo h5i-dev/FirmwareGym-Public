@@ -15,3 +15,11 @@ Input word `a` is the measured load current in milliamps (`current_ma`). Input w
 Output word `a` is `relay_closed` (`1` closed, `0` open). Output word `b` is `fault` (`1` tripped, `0` clear). Output words `c` and `d` stay `0`.
 
 The simulation names the inputs `current_ma` and `reset`, and the outputs `relay_closed` and `fault`.
+
+## Lean submission
+
+The theorem declarations in [public/obligations](public/obligations) are the grading contracts.
+Use [proofs/Submission.lean](proofs/Submission.lean) as the starting point. Fill in the proofs for
+your Rust implementation and submit the file contents as `proof` alongside `src/lib.rs`. The
+grader generates the `Firmware` module from your Rust submission and reports each theorem
+separately.

@@ -10,7 +10,7 @@ from firmwaregym import Evaluation, FirmwareGym, compute_reward
 
 def custom_speed_aware_reward(ev: Evaluation) -> float:
     """Example user-defined RL reward function over raw Evaluation signals."""
-    if not ev.compiled:
+    if not ev.compiled or ev.formal.total == 0:
         return 0.0
     sim_frac = ev.simulation.passed / max(ev.simulation.total, 1)
     formal_frac = ev.formal.passed / max(ev.formal.total, 1)
@@ -34,11 +34,16 @@ def main() -> None:
     print(f"Available tasks ({len(tasks)}):", [t.id for t in tasks])
 
     task = gym.get_task("overcurrent-trip")
-    starter_path = Path(__file__).parent / "overcurrent_starter" / "starter" / "src" / "lib.rs"
-    code = starter_path.read_text() if starter_path.is_file() else task.files["src/lib.rs"]
-
-    # Async evaluation is recommended for Renode + Lean 4 proofs
-    result = gym.evaluate_async(task.id, files={"src/lib.rs": code})
+    sample = Path(__file__).parent / "overcurrent_starter"
+    rust_path = Path(os.environ.get("FIRMWAREGYM_RUST_FILE", sample / "starter/src/lib.rs"))
+    proof_path = Path(os.environ.get("FIRMWAREGYM_PROOF_FILE", sample / "proofs/Submission.lean"))
+    result = gym.evaluate_async(
+        task.id,
+        files={"src/lib.rs": rust_path.read_text()},
+        proof=proof_path.read_text(),
+    )
+    for obligation in result.obligations:
+        print(obligation.id, obligation.status, obligation.feedback)
     print("Compiled:", result.compiled)
     print("Formal:", f"{result.formal.passed}/{result.formal.total}", result.formal.feedback)
     print("Simulation:", f"{result.simulation.passed}/{result.simulation.total}", result.simulation.feedback)

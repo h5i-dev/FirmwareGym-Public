@@ -13,7 +13,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable
 
 __all__ = [
@@ -24,6 +24,7 @@ __all__ = [
     "Identity",
     "Job",
     "Metrics",
+    "ObligationResult",
     "OpenEnvClient",
     "OpenEnvStepResult",
     "PerformanceReport",
@@ -90,6 +91,7 @@ class Task:
     tags: list[str] = None  # type: ignore[assignment]
     budgets: dict[str, Any] = None  # type: ignore[assignment]
     optimization: dict[str, Any] | None = None
+    obligations: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.tags is None:
@@ -153,6 +155,13 @@ class RewardReport:
 
 
 @dataclass(frozen=True)
+class ObligationResult:
+    id: str
+    status: str
+    feedback: str
+
+
+@dataclass(frozen=True)
 class Evaluation:
     compiled: bool
     formal: Section
@@ -162,6 +171,9 @@ class Evaluation:
     budgets: BudgetReport | None = None
     performance: PerformanceReport | None = None
     reward: RewardReport | None = None
+    obligations: list[ObligationResult] = field(default_factory=list)
+    held_out: Section | None = None
+    provenance: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -250,15 +262,34 @@ class FirmwareGym:
             tags=list(body.get("tags", [])),
             budgets=dict(body.get("budgets", {})),
             optimization=body.get("optimization"),
+            obligations=dict(body.get("obligations", {})),
         )
 
-    def evaluate(self, task_id: str, files: dict[str, str]) -> Evaluation:
-        body = self._request("POST", f"/v1/tasks/{task_id}/evaluate", {"files": files})
-        return _evaluation(body)
+    def evaluate(self, task_id: str, files: dict[str, str], *, proof: str | None = None) -> Evaluation:
+        payload: dict[str, Any] = {"files": files}
+        if proof is not None:
+            payload["proof"] = proof
+        return _evaluation(self._request("POST", f"/v1/tasks/{task_id}/evaluate", payload))
 
-    def submit_job(self, task_id: str, files: dict[str, str]) -> Job:
-        body = self._request("POST", "/v1/jobs", {"task_id": task_id, "files": files})
-        return _job(body)
+    def submit_job(
+        self,
+        task_id: str,
+        files: dict[str, str],
+        *,
+        proof: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> Job:
+        payload: dict[str, Any] = {"task_id": task_id, "files": files}
+        if proof is not None:
+            payload["proof"] = proof
+        headers = {} if idempotency_key is None else {"Idempotency-Key": idempotency_key}
+        return _job(self._request("POST", "/v1/jobs", payload, extra_headers=headers))
+
+    def list_jobs(self) -> list[Job]:
+        return [_job(body) for body in self._request("GET", "/v1/jobs", None)]
+
+    def cancel_job(self, job_id: str) -> Job:
+        return _job(self._request("DELETE", f"/v1/jobs/{job_id}", None))
 
     def get_job(self, job_id: str) -> Job:
         body = self._request("GET", f"/v1/jobs/{job_id}", None)
@@ -269,11 +300,12 @@ class FirmwareGym:
         task_id: str,
         files: dict[str, str],
         *,
+        proof: str | None = None,
         poll_interval: float = 0.5,
         max_wait: float = 600.0,
     ) -> Evaluation:
         """Submit an async job and poll until completion (recommended for Renode / Lean 4)."""
-        job = self.submit_job(task_id, files)
+        job = self.submit_job(task_id, files, proof=proof)
         deadline = time.monotonic() + max_wait
         while time.monotonic() < deadline:
             cur = self.get_job(job.job_id)
@@ -281,12 +313,21 @@ class FirmwareGym:
                 return cur.result
             if cur.status == "failed":
                 raise FirmwareGymError(500, cur.error or "evaluation job failed")
+            if cur.status == "canceled":
+                raise FirmwareGymError(409, "evaluation job was canceled")
             time.sleep(poll_interval)
         raise FirmwareGymError(408, f"job {job.job_id} did not finish within {max_wait}s")
 
-    def _request(self, method: str, path: str, payload: dict[str, Any] | None) -> Any:
+    def _request(
+        self,
+        method: str,
+        path: str,
+        payload: dict[str, Any] | None,
+        *,
+        extra_headers: dict[str, str] | None = None,
+    ) -> Any:
         data = None if payload is None else json.dumps(payload).encode()
-        headers: dict[str, str] = {}
+        headers = dict(extra_headers or {})
         if data is not None:
             headers["content-type"] = "application/json"
         if self.api_key:
@@ -318,13 +359,16 @@ class FirmwareGym:
 def _evaluation(body: dict[str, Any]) -> Evaluation:
     return Evaluation(
         compiled=bool(body["compiled"]),
+        provenance=body.get("provenance"),
         formal=_section(body["formal"]),
         simulation=_section(body["simulation"]),
+        held_out=_section(body["held_out"]) if body.get("held_out") else None,
         fuzz=_section(body["fuzz"]) if body.get("fuzz") else None,
         metrics=_metrics(body.get("metrics")),
         budgets=_budgets(body.get("budgets")),
         performance=_performance(body.get("performance")),
         reward=_reward(body.get("reward")),
+        obligations=[ObligationResult(**item) for item in body.get("obligations", [])],
     )
 
 

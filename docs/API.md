@@ -3,7 +3,7 @@
 **API Version**: `0.2.0`  
 **OpenAPI Schema**: [`openapi.json`](openapi.json) (also served live at `GET /openapi.json`, with interactive docs at `GET /docs`)
 
-All public API endpoints evaluate submissions against **public specifications only**. Hidden verification suites and adversarial property-based fuzzers run strictly on operator evaluation pipelines.
+All public API endpoints evaluate submissions against **public specifications only**. Some tasks also run public development checks. Final held-out scenarios and private fuzzing remain operator-only.
 
 ---
 
@@ -17,7 +17,7 @@ Authorization: Bearer fg_live_<token>
 X-API-Key: fg_live_<token>
 ```
 
-For WebSocket clients (`/ws`) that cannot set custom headers, `?api_key=fg_live_<token>` is also accepted.
+Send the authorization header on the WebSocket upgrade request. The Python OpenEnv client sets it automatically.
 
 ### Rate Limits & Tenant Quotas
 
@@ -25,6 +25,7 @@ Quotas are enforced server-side per tenant:
 - **Burst rate limit**: Sliding 60-second window (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `429 Too Many Requests` + `Retry-After`).
 - **Per-tenant concurrency cap**: Limits simultaneous in-flight/queued evaluations per tenant (`429 Too Many Requests` + `Retry-After`).
 - **Monthly quota**: Persistent UTC calendar-month evaluation cap (`429 Too Many Requests`). Rejected `400 Bad Request` submissions do **not** consume your monthly quota.
+- **Per-tenant waiting queue**: Returns `429 Too Many Requests` when your tenant fills its waiting allocation.
 - **Global queue backpressure**: Returns `503 Service Unavailable` + `Retry-After` when the server evaluation queue is full.
 
 ---
@@ -38,15 +39,23 @@ Quotas are enforced server-side per tenant:
 | `GET` | `/docs` | Public | Interactive HTML API documentation |
 | `GET` | `/v1/me` | Required | Caller identity, role, burst rate remaining, and `usage` snapshot |
 | `GET` | `/v1/tasks` | Required | List tasks (optional `?family=` and `?level=` query filters) |
-| `GET` | `/v1/tasks/{id}` | Required | Fetch task README, starter Rust crate, public Lean 4 spec, budgets, optimization config, and public scenario YAML |
-| `POST` | `/v1/tasks/{id}/evaluate` | Required | Synchronous evaluation (`{"files": {"src/lib.rs": "..."}}`) |
-| `POST` | `/v1/jobs` | Required | Submit async evaluation job (`{"task_id": "...", "files": {...}}`) → `202 Accepted` (**recommended for Renode + Lean 4**) |
-| `GET` | `/v1/jobs/{job_id}` | Required | Poll async job status (`queued`, `running`, `completed`, `failed`) and full `Evaluation` payload |
+| `GET` | `/v1/tasks/{id}` | Required | Fetch task README, starter Rust crate, public Lean 4 spec, fixed `obligations` keyed by theorem ID, budgets, optimization config, and public scenario YAML |
+| `POST` | `/v1/tasks/{id}/evaluate` | Required | Synchronous evaluation with `files` and optional `proof` |
+| `POST` | `/v1/jobs` | Required | Submit `task_id`, `files`, and optional `proof`. Returns `202 Accepted` with a job ID |
+| `GET` | `/v1/jobs` | Required | List the caller’s jobs, newest first |
+| `GET` | `/v1/jobs/{job_id}` | Required | Poll the job and read its evaluation once it completes |
+| `DELETE` | `/v1/jobs/{job_id}` | Required | Cancel a queued or running job owned by the caller |
+
+For an async retry, send the same `Idempotency-Key` header and the same payload. While the job is retained, this returns the existing job ID. Reusing the key with a different request returns `409 Conflict`. Each tenant has its own key namespace.
+
+Jobs start as `queued`, then become `running`. Terminal states are `completed`, `failed`, and `canceled`. A running job enters `canceling` while the worker stops its subprocesses. A queued cancellation releases reserved quota. An evaluation that already started retains its charge. When persistent job storage is enabled, completed results survive restart and interrupted jobs become `failed`.
 
 ### Submission Rules
 
 - Files must live under `src/` and end with `.rs` (`src/lib.rs` required; up to 16 files, max 64 KiB/file, 256 KiB total).
 - Submissions must be safe `#![no_std]` Rust (`-F unsafe-code` enforced; `unsafe`, `extern`, compile-time host exfiltration macros such as `include_str!`/`env!`, and linker attributes such as `#[link_section]`/`#[no_mangle]` are rejected with `400 Bad Request`).
+
+For formal credit, pass `proof` as the UTF-8 contents of one Lean module (up to 256 KiB). Import `Firmware` and `Spec` as required by the task and implement each fixed theorem as `FirmwareGymSubmission.<id>`. Keep the statement unchanged. Put any helper definitions and lemmas in the same module. The grader extracts `Firmware` from the submitted Rust for the Cortex-M target used by Renode. A theorem that depends on `sorry` cannot earn credit. See the [sample proof template](../examples/overcurrent_starter/proofs/Submission.lean).
 
 ### `Evaluation` Response Schema
 
@@ -54,10 +63,13 @@ Quotas are enforced server-side per tenant:
 {
   "compiled": true,
   "formal": {
-    "passed": 3,
-    "total": 3,
-    "feedback": ["formal verification closed every obligation (fast prebuilt LEAN_PATH)"]
+    "passed": 1,
+    "total": 1,
+    "feedback": []
   },
+  "obligations": [
+    { "id": "trips_on_overcurrent", "status": "proved", "feedback": "" }
+  ],
   "simulation": {
     "passed": 3,
     "total": 3,
@@ -91,7 +103,7 @@ Quotas are enforced server-side per tenant:
     "baselines": { "instructions": 83.0, "ram_bytes": 16.0 }
   },
   "reward": {
-    "scheme": "correctness_gated_v1",
+    "scheme": "correctness_gated_proof_v2",
     "alpha": 0.5,
     "correctness": 1.0,
     "budget_passed": true,
@@ -115,25 +127,22 @@ Quotas are enforced server-side per tenant:
 
 #### Default Reward vs. Custom Rewards
 
-The built-in `reward` field implements `correctness_gated_v1`:
-- Reference-relative performance: weighted geometric mean $S(P) = \prod_i S_i(P)^{w_i}$ (reference = `1.0`; faster/smaller beats `1.0`).
-- Efficiency: $E(P) = S(P) / (1 + S(P)) \in [0, 1)$.
-- Reward: $R(P) = \alpha + (1 - \alpha) E(P)$ when formal, simulation, and budgets all pass (`gated: true`); strictly below $\alpha$ otherwise.
+A proof submission includes an independent verdict for each fixed theorem. `proved` earns credit, `unproved` means the theorem was not accepted, and `not_checked` means the grader could not reach that check. Rust-only evaluation can return a formal total of zero. Check that the formal total is positive when a custom reward requires proof.
 
-This is only one reference formula. Every response includes all raw `metrics`, `budgets.limits`, `performance.ratios`, and `performance.baselines` so you can compute any custom reward function client-side (see `firmwaregym.compute_reward` in the Python SDK).
+The server returns the reward scheme in `reward.scheme`. Proof submissions use `correctness_gated_proof_v2` and need all required proof checks, public runtime checks, and resource budgets to pass for the performance bonus. Rust-only evaluation uses `correctness_gated_v1`. Use the reported metrics and baseline ratios for custom rewards and handle metrics that are absent.
 
 ---
 
 ## 3. OpenEnv-Compatible Adapter (`/ws`, `/mcp`, `/metadata`, `/schema`)
 
-FirmwareGym implements the OpenEnv wire protocol (`openenv/OpenEnv`) so RL trainers and unmodified OpenEnv Python clients (`EnvClient` / `TextArenaEnv`) can run multi-turn episodes directly:
+Use REST for proof submissions. OpenEnv steps submit Rust for development feedback. FirmwareGym implements the OpenEnv wire protocol (`openenv/OpenEnv`) so RL trainers and unmodified OpenEnv Python clients (`EnvClient` / `TextArenaEnv`) can run multi-turn episodes directly:
 
 | Method | Path | Description |
 | --- | --- | --- |
 | `GET` | `/metadata` | Environment metadata (`name`, `version`, `description`) |
 | `GET` | `/schema` | JSON Schemas for `action`, `observation`, and `state` |
 | `POST` | `/mcp` | JSON-RPC 2.0 (`openenv/session/create`, `openenv/session/close`, `tools/list`, `tools/call` for `list_tasks` & `get_task`) |
-| `GET` | `/ws` | WebSocket RL episode endpoint (optional `?session_id=` and `?api_key=`) |
+| `GET` | `/ws` | WebSocket RL episode endpoint (optional `?session_id=` for reconnects) |
 
 ### WebSocket Messages (`/ws`)
 
