@@ -57,6 +57,10 @@
     .primary:hover { color: var(--bg); background: var(--text); }
     section { padding: clamp(2.5rem, 5vw, 4rem) var(--gutter); border-top: 1px solid var(--line); }
     .intro { max-width: 51rem; }
+    .overview-list { max-width: 51rem; padding-left: 1.25rem; margin: 1.25rem 0 0; color: var(--muted); }
+    .overview-list li + li { margin-top: .65rem; }
+    .overview-list li::marker { color: var(--accent); }
+    .overview-list strong { color: var(--text); }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
     .grid article { padding: 1.25rem; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); background: var(--panel); }
     .grid p { margin-top: .6rem; }
@@ -78,7 +82,7 @@
   <header>
     <nav class="wrap" aria-label="Main navigation">
       <div class="identity"><a class="parent-brand" href="https://h5i.dev/">h5i</a><a class="brand" href="./index.html">FirmwareGym</a></div>
-      <div><a href="#tasks">Tasks</a><a href="#evaluation">Evaluation</a><a href="#results">Results</a><a href="#start">Get started</a></div>
+      <div><a href="#overview">Overview</a><a href="#tasks">Sample tasks</a><a href="#evaluation">Evaluation</a><a href="#results">Results</a><a href="#start">Get started</a></div>
     </nav>
   </header>
   <main class="wrap">
@@ -94,9 +98,18 @@
       <img class="hero-art" src="assets/robot-and-sensor.png" width="1752" height="897" alt="Technical illustration of a warehouse rover and a sensor circuit board">
     </div>
 
+    <section id="overview">
+      <h2>Can AI build and formally verify firmware?</h2>
+      <ul class="overview-list">
+        <li><strong>Implement a firmware task.</strong> Start with a Rust starter and a specification for an embedded system, such as a protection relay or a flash store that must recover after a power cut.</li>
+        <li><strong>Prove its behavior.</strong> Formal verification uses Lean 4 to check a mathematical proof that the submitted firmware satisfies a required property for every case covered by the specification.</li>
+        <li><strong>Test it on virtual hardware.</strong> Renode runs the compiled firmware through scenarios and measures CPU instructions and memory use against the task’s resource budgets.</li>
+      </ul>
+    </section>
+
     <section id="tasks">
-      <h2>Can AI build and formally verify high-performance firmware?</h2>
-      <p class="intro">Can a store recover a whole transaction after a power cut? Will a relay open if overcurrent and a reset request arrive in the same step? Try both challenges with the public starters and Lean proof obligations.</p>
+      <h2>Public sample tasks</h2>
+      <p class="intro">Explore the Rust starters and Lean proof obligations for two embedded systems.</p>
       <div class="grid">
         <article>
           <span class="label">L4 public sample</span>
