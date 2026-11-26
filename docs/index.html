@@ -61,6 +61,8 @@
     .overview-list li + li { margin-top: .65rem; }
     .overview-list li::marker { color: var(--accent); }
     .overview-list strong { color: var(--text); }
+    .samples { margin-top: 1.5rem; }
+    .samples .overview-list { margin-top: .75rem; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
     .grid article { padding: 1.25rem; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); background: var(--panel); }
     .grid p { margin-top: .6rem; }
@@ -82,7 +84,7 @@
   <header>
     <nav class="wrap" aria-label="Main navigation">
       <div class="identity"><a class="parent-brand" href="https://h5i.dev/">h5i</a><a class="brand" href="./index.html">FirmwareGym</a></div>
-      <div><a href="#overview">Overview</a><a href="#tasks">Sample tasks</a><a href="#evaluation">Evaluation</a><a href="#results">Results</a><a href="#start">Get started</a></div>
+      <div><a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#results">Results</a><a href="#start">Get started</a></div>
     </nav>
   </header>
   <main class="wrap">
@@ -91,7 +93,7 @@
         <h1>FirmwareGym<span class="accent" aria-hidden="true">.</span></h1>
         <p class="lead">FirmwareGym challenges AI agents to build firmware with the <a href="https://h5i.dev/">h5i framework</a>, prove its behavior in Lean 4, and meet resource budgets on virtual hardware in Renode.</p>
         <div class="links">
-          <a class="button primary" href="#tasks">Explore the sample tasks</a>
+          <a class="button primary" href="#samples">Explore the sample tasks</a>
           <a class="button" href="https://github.com/h5i-dev/FirmwareGym-Public">View on GitHub</a>
         </div>
       </div>
@@ -101,38 +103,26 @@
     <section id="overview">
       <h2>Can AI build and formally verify firmware?</h2>
       <ul class="overview-list">
-        <li><strong>Implement a firmware task.</strong> Start with a Rust starter and a specification for an embedded system, such as a protection relay or a flash store that must recover after a power cut.</li>
-        <li><strong>Prove its behavior.</strong> Formal verification uses Lean 4 to check a mathematical proof that the submitted firmware satisfies a required property for every case covered by the specification.</li>
-        <li><strong>Test it on virtual hardware.</strong> Renode runs the compiled firmware through scenarios and measures CPU instructions and memory use against the task’s resource budgets.</li>
+        <li><strong>Build realistic firmware.</strong> Use h5i, a Rust framework for building verifiable embedded systems.</li>
+        <li><strong>Formally verify its behavior.</strong> Prove critical properties with h5i and Lean 4, such as whether a flash store can recover without partial updates after a power cut.</li>
+        <li><strong>Test on virtual hardware.</strong> Run the compiled firmware through realistic scenarios in Renode and measure CPU instruction counts and memory use.</li>
       </ul>
     </section>
 
     <section id="tasks">
-      <h2>Public sample tasks</h2>
-      <p class="intro">Explore the Rust starters and Lean proof obligations for two embedded systems.</p>
-      <div class="grid">
-        <article>
-          <span class="label">L4 public sample</span>
-          <h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">Crash-consistent NOR flash store</a></h3>
-          <p>Commit a batch across four 160-byte blocks. A cut can land after a byte program or block erase takes effect and before the firmware hears back. Recover the entire old or new map, keep recovery stable, and distribute wear across blocks.</p>
-          <p><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/flash_kv_nor_starter/public/simulation.yaml">View the sample Renode scenario</a></p>
-        </article>
-        <article>
-          <span class="label">Introductory public sample</span>
-          <h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">Overcurrent Trip Latch</a></h3>
-          <p>Open a relay at 5 A or above, even if reset is requested in the same step. Start with a small state machine and prove its safety properties.</p>
-        </article>
-      </div>
-    </section>
-
-    <section id="evaluation">
-      <h2>What gets measured</h2>
-      <p class="intro">The Python SDK exposes the raw metrics, so researchers can define their own reinforcement learning rewards.</p>
-      <div class="grid">
-        <article><h3>Formal verification</h3><p>Fixed Lean 4 obligations checked against the submitted Rust implementation.</p></article>
-        <article><h3>Simulation</h3><p>Passed scenarios for compiled firmware running in Renode.</p></article>
-        <article><h3>Execution efficiency</h3><p>Total CPU instructions across scenario steps, plus mean and peak instructions per step.</p></article>
-        <article><h3>Memory efficiency</h3><p>Binary size, RAM usage, and peak stack usage.</p></article>
+      <h2>Tasks</h2>
+      <p class="intro">FirmwareGym spans five difficulty levels. Tasks include coordinating warehouse robots, fusing noisy or faulty sensor readings, controlling motors and batteries, scheduling real-time jobs, and storing data on NOR flash.</p>
+      <ul class="overview-list">
+        <li><strong>Required properties.</strong> Robots must avoid collisions and complete deliveries, sensor fusion must account for faulty readings, and a storage transaction must recover as a whole after a power cut.</li>
+        <li><strong>Measurements.</strong> Each submission is scored on Lean proof obligations and Renode scenario pass rates. The grader also records CPU instruction counts, binary size, RAM usage, and peak stack usage.</li>
+      </ul>
+      <p class="note"><strong>The full dataset and task catalog are currently private.</strong> Hosted access to the full catalog requires an API key.</p>
+      <div id="samples" class="samples">
+        <h3>Public sample tasks</h3>
+        <ul class="overview-list">
+          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">Overcurrent Trip Latch</a> opens a relay at 5 A or above, even during a reset request.</li>
+          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">Crash-consistent NOR flash store</a> recovers either the entire old map or the entire new map after a power cut.</li>
+        </ul>
       </div>
     </section>
 
@@ -159,7 +149,7 @@
       <h2>Get started</h2>
       <p class="intro">The Python SDK, API specification, and sample tasks are available under Apache 2.0. The hosted evaluator and full task catalog require an API key from your operator. Hosted development feedback and final benchmark evaluation are run separately.</p>
       <div class="grid">
-        <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/sdk/python">Python SDK</a></h3><p>Fetch tasks, submit Rust and Lean, and inspect results.</p></article>
+        <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/sdk/python">Python SDK</a></h3><p>Fetch tasks, submit Rust and Lean, and use raw evaluation metrics to define custom rewards.</p></article>
         <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/docs/API.md">API reference</a></h3><p>Read the evaluation API and response schema.</p></article>
         <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/quickstart.py">Quickstart</a></h3><p>Run a firmware evaluation and compute a custom reward.</p></article>
         <article><h3><a href="https://github.com/h5i-dev/FirmwareGym-Public/blob/main/examples/openenv_rollout.py">OpenEnv rollout</a></h3><p>Use evaluation feedback across multiple agent turns.</p></article>
