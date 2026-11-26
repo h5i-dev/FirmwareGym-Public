@@ -162,20 +162,20 @@ observe again allKeys = some values</code></pre>
     <section id="results">
       <span class="label">Opus 5.5 baseline</span>
       <h2 id="pass-rate">Task pass rate by domain</h2>
-      <p class="intro">11 of 16 scored tasks passed the final evaluation. The run attempted 18 tasks.</p>
+      <p class="intro">11 of 18 tasks passed the final evaluation.</p>
       <table aria-labelledby="pass-rate" aria-describedby="method">
-        <thead><tr><th scope="col">Domain</th><th scope="col">Passed / scored</th><th scope="col">Pass rate</th></tr></thead>
+        <thead><tr><th scope="col">Domain</th><th scope="col">Passed / attempted</th><th scope="col">Pass rate</th></tr></thead>
         <tbody>
           <tr><th scope="row">Control, power &amp; safety</th><td class="rate">7 / 7</td><td class="rate">100%</td></tr>
           <tr><th scope="row">Storage</th><td class="rate">1 / 2</td><td class="rate">50%</td></tr>
-          <tr><th scope="row">Communication</th><td class="rate">1 / 2</td><td class="rate">50%</td></tr>
+          <tr><th scope="row">Communication</th><td class="rate">1 / 3</td><td class="rate">33%</td></tr>
           <tr><th scope="row">Sensor fusion</th><td class="rate">1 / 2</td><td class="rate">50%</td></tr>
           <tr><th scope="row">Scheduling &amp; virtual machines</th><td class="rate">1 / 3</td><td class="rate">33%</td></tr>
-          <tr><th scope="row">Robot coordination</th><td class="rate">—</td><td>Unscored</td></tr>
+          <tr><th scope="row">Robot coordination</th><td class="rate">0 / 1</td><td class="rate">0%</td></tr>
         </tbody>
-        <tfoot><tr><th scope="row">Overall</th><td class="rate">11 / 16</td><td class="rate">69%</td></tr></tfoot>
+        <tfoot><tr><th scope="row">Overall</th><td class="rate">11 / 18</td><td class="rate">61%</td></tr></tfoot>
       </table>
-      <p class="note" id="method">One agent run per task, with up to 30 minutes and iterative development feedback. The final grader required successful compilation, all Lean obligations and Renode scenarios, any applicable randomized checks, and all resource budgets. Grader errors left one communication task and one robot coordination task unscored. Percentages use scored tasks and are rounded to whole numbers.</p>
+      <p class="note" id="method">One agent run per task, with up to 30 minutes and iterative development feedback. The final grader required successful compilation, all Lean obligations and Renode scenarios, any applicable randomized checks, and all resource budgets. A task fails if proof checking cannot complete. Lean thread creation failed during kernel replay for one communication task, and Lean ran out of memory during elaboration for one robot coordination task. Percentages use all attempted tasks and are rounded to whole numbers.</p>
     </section>
 
     <section id="start">
