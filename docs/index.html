@@ -61,6 +61,16 @@
     .overview-list li + li { margin-top: .65rem; }
     .overview-list li::marker { color: var(--accent); }
     .overview-list strong { color: var(--text); }
+    .task-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--gutter); align-items: center; }
+    .workflow { margin: 0; padding: clamp(.875rem, 2vw, 1.5rem); border: 1px solid var(--line); background: var(--panel); }
+    .workflow-source, .workflow-branch { padding: .75rem; border: 1px solid var(--line); text-align: center; background: var(--bg); }
+    .workflow-source { width: fit-content; margin-inline: auto; border-color: var(--accent); }
+    .workflow-branches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; position: relative; padding-top: 2rem; }
+    .workflow-branches::before { content: ""; position: absolute; top: 0; left: 50%; height: 1rem; border-left: 1px solid var(--accent); }
+    .workflow-branches::after { content: ""; position: absolute; inset: 1rem 25% auto; height: 1rem; border: 1px solid var(--accent); border-bottom: 0; pointer-events: none; }
+    .workflow-branch strong { display: block; line-height: 1.25; }
+    .workflow-branch span, .workflow figcaption { display: block; margin-top: .4rem; color: var(--muted); font-size: .875rem; }
+    .workflow figcaption { margin-top: .85rem; text-align: center; }
     .samples { margin-top: 1.5rem; }
     .samples .overview-list { margin-top: .75rem; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-top: 1.5rem; }
@@ -76,7 +86,7 @@
     .note { margin-top: 1rem; max-width: 53rem; font-size: .9rem; }
     .footer { color: var(--muted); font-size: .9rem; }
     @media (max-width: 860px) {
-      .hero { grid-template-columns: minmax(0, 1fr); }
+      .hero, .task-layout { grid-template-columns: minmax(0, 1fr); }
       .hero-copy { padding-block: 3rem 1rem; }
     }
     @media (max-width: 420px) { .grid { grid-template-columns: 1fr; } th, td { padding-inline: .25rem; } }
@@ -113,16 +123,34 @@
 
     <section id="tasks">
       <h2>Tasks</h2>
-      <p class="intro">FirmwareGym spans five difficulty levels. Tasks include coordinating warehouse robots, fusing noisy or faulty sensor readings, controlling motors and batteries, scheduling real-time jobs, and storing data on NOR flash.</p>
-      <ul class="overview-list">
-        <li><strong>Prove implementation correctness.</strong> Use Lean 4 to prove task-specific properties such as collision-free robot deliveries or recovery of an entire transaction after a power cut.</li>
-        <li><strong>Optimize performance.</strong> Run the compiled firmware through Renode scenarios. Use the raw CPU instruction counts, binary size, RAM usage, and peak stack measurements to guide optimization or define a custom reward. The default reward uses task-specific resource budgets.</li>
-      </ul>
+      <div class="task-layout">
+        <div>
+          <p class="intro">FirmwareGym spans five difficulty levels. Tasks include coordinating warehouse robots, fusing noisy or faulty sensor readings, controlling motors and batteries, scheduling real-time jobs, and storing data on NOR flash.</p>
+          <ul class="overview-list">
+            <li><strong>Prove implementation correctness.</strong> Use Lean 4 to prove task-specific properties such as collision-free robot deliveries or recovery of an entire transaction after a power cut.</li>
+            <li><strong>Optimize performance.</strong> Run the compiled firmware through Renode scenarios. Use the raw CPU instruction counts, binary size, RAM usage, and peak stack measurements to guide optimization or define a custom reward. The default reward uses task-specific resource budgets.</li>
+          </ul>
+        </div>
+        <figure class="workflow">
+          <div class="workflow-source"><strong>Rust firmware candidate</strong></div>
+          <div class="workflow-branches">
+            <div class="workflow-branch">
+              <strong>Verify properties</strong>
+              <span>Lean 4 checks proofs against the specification.</span>
+            </div>
+            <div class="workflow-branch">
+              <strong>Measure performance</strong>
+              <span>Renode runs scenarios and returns CPU and memory metrics.</span>
+            </div>
+          </div>
+          <figcaption>Use the measurements to optimize the firmware, then recheck the proofs.</figcaption>
+        </figure>
+      </div>
       <div id="samples" class="samples">
         <p class="intro">The full dataset and task catalog are currently private, and hosted access requires an API key. Two sample tasks are publicly available:</p>
         <ul class="overview-list">
           <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">(Sample - 1) Overcurrent Trip Latch</a>. Implement a relay that trips when the current reaches 5 A. Prove in Lean 4 that overcurrent takes priority over a simultaneous reset and that, across any sequence of inputs, the relay stays open after a trip until a reset is requested at a safe current.</li>
-          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">(Sample - 2) Crash-consistent NOR flash store</a>. Implement a key-value store that commits batches of updates to NOR flash. Prove in Lean 4 that a completed commit survives reboot and that a power cut during the specified overwrite-and-delete batch leaves either the entire old map or the entire new map. A second reboot must recover the same map.</li>
+          <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">(Sample - 2) Crash-consistent NOR flash store</a>. Implement a key-value store that commits batches of updates to NOR flash. Prove in Lean 4 that commits survive reboot and interrupted batches recover atomically, even across repeated reboots.</li>
         </ul>
       </div>
     </section>
