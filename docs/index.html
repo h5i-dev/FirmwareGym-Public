@@ -116,9 +116,8 @@
         <li><strong>Prove implementation correctness.</strong> Use Lean 4 to prove task-specific properties such as collision-free robot deliveries or recovery of an entire transaction after a power cut.</li>
         <li><strong>Optimize performance.</strong> Run the compiled firmware through Renode scenarios and use CPU instruction counts, binary size, RAM usage, and peak stack usage to guide optimization.</li>
       </ul>
-      <p class="note"><strong>The full dataset and task catalog are currently private.</strong> Hosted access to the full catalog requires an API key.</p>
       <div id="samples" class="samples">
-        <h3>Samples</h3>
+        <p class="intro">The full dataset and task catalog are currently private, and hosted access requires an API key. Two sample tasks are publicly available:</p>
         <ul class="overview-list">
           <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter">Overcurrent Trip Latch</a> opens a relay at 5 A or above, even during a reset request.</li>
           <li><a href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/flash_kv_nor_starter">Crash-consistent NOR flash store</a> recovers either the entire old map or the entire new map after a power cut.</li>
