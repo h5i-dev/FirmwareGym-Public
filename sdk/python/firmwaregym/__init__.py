@@ -125,6 +125,7 @@ class BudgetReport:
     passed: bool
     violations: list[str]
     limits: dict[str, Any] = None  # type: ignore[assignment]
+    utilization: dict[str, float] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.limits is None:
@@ -419,6 +420,7 @@ def _budgets(body: dict[str, Any] | None) -> BudgetReport | None:
         passed=bool(body["passed"]),
         violations=[str(v) for v in body.get("violations", [])],
         limits=dict(body.get("limits", {})),
+        utilization={key: float(ratio) for key, ratio in body.get("utilization", {}).items()},
     )
 
 

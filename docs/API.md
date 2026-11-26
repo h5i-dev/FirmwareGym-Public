@@ -94,6 +94,7 @@ For formal credit, pass `proof` as the UTF-8 contents of one Lean module (up to 
       "max_binary_bytes": 8192,
       "max_step_instructions": 500
     },
+    "utilization": { "max_ram_bytes": 0.0625, "max_peak_stack_bytes": 0.0625, "max_binary_bytes": 0.18408203125, "max_step_instructions": 0.062 },
     "violations": []
   },
   "performance": {
@@ -113,6 +114,8 @@ For formal credit, pass `proof` as the UTF-8 contents of one Lean module (up to 
   }
 }
 ```
+
+Resource readings are in `metrics`. Each `budgets.utilization` value is the measured usage divided by the corresponding limit in `budgets.limits`. A ratio of 1.0 uses the full allowance, and ratios above 1.0 show how far usage exceeded the limit. Missing measurements and zero limits have no ratio. The `budgets.passed` field records the hard-limit decision used by the reward.
 
 #### Performance Metric Definitions
 

@@ -4,6 +4,32 @@
       "Evaluation": {
         "properties": {
           "budgets": {
+            "properties": {
+              "limits": {
+                "additionalProperties": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              "passed": {
+                "type": "boolean"
+              },
+              "utilization": {
+                "additionalProperties": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "description": "Measured usage divided by the corresponding positive limit. Values can exceed 1. Missing measurements and zero limits have no ratio.",
+                "type": "object"
+              },
+              "violations": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
             "type": "object"
           },
           "compiled": {
