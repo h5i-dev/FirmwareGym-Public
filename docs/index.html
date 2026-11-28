@@ -163,6 +163,11 @@
     .demo-card a:focus-visible { outline-color: #fff; }
     .table-scroll { margin-top: 1.5rem; overflow-x: auto; }
     table { width: 100%; min-width: 55rem; border-collapse: collapse; text-align: left; }
+    .performance-example { margin-top: 1.5rem; padding: 1rem 1.25rem; border-left: 3px solid var(--accent); background: var(--panel); }
+    .performance-example strong { display: block; color: var(--accent); font-size: clamp(1.5rem, 4vw, 2.4rem); line-height: 1.2; }
+    .performance-example p { margin-top: .4rem; }
+    .performance-table { min-width: 30rem; }
+    .baseline-subheading { margin-top: 2rem; }
     th, td { border-bottom: 1px solid var(--line); padding: .72rem .5rem; }
     thead { color: var(--muted); }
     td:nth-child(n+2), thead th:nth-child(n+2) { text-align: right; }
@@ -260,9 +265,35 @@
 
     <section id="results">
       <h2 id="baseline">Public Baseline</h2>
+      <h3 id="baseline-performance">Performance of verified firmware</h3>
+      <div class="performance-example">
+        <strong>35% fewer peak instructions</strong>
+        <p>On Motor Controller, GPT-6.1 Terra used 62 instructions in its heaviest measured step, compared with 95 for Claude Sonnet 5.5. Both submissions passed every Lean obligation and Renode check within budget.</p>
+      </div>
+      <p class="note" id="performance-method">Across the eight tasks both models fully passed, these counts show how often each model used fewer instructions or bytes on the same task. Average instructions come from public scenarios. Peak instructions include final grading workloads.</p>
+      <div class="table-scroll" role="region" aria-label="Performance on tasks both models passed" tabindex="0">
+        <table class="performance-table" aria-labelledby="baseline-performance" aria-describedby="performance-method">
+          <thead>
+            <tr>
+              <th scope="col">Measured resource</th>
+              <th scope="col">Terra lower</th>
+              <th scope="col">Sonnet lower</th>
+              <th scope="col">Equal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Average instructions per step</th><td>2</td><td>3</td><td>3</td></tr>
+            <tr><th scope="row">Peak instructions per step</th><td>2</td><td>4</td><td>2</td></tr>
+            <tr><th scope="row">RAM</th><td>0</td><td>0</td><td>8</td></tr>
+            <tr><th scope="row">Peak stack</th><td>3</td><td>2</td><td>3</td></tr>
+            <tr><th scope="row">Binary size</th><td>3</td><td>4</td><td>1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 class="baseline-subheading" id="baseline-correctness">Complete pass rates</h3>
       <p class="intro">Final pass rates on the same 25-task catalog. Each cell shows the share of tasks that passed every required check.</p>
       <div class="table-scroll" role="region" aria-label="Baseline results by model and domain" tabindex="0">
-        <table aria-labelledby="baseline" aria-describedby="method">
+        <table aria-labelledby="baseline-correctness" aria-describedby="method">
           <thead>
             <tr>
               <th scope="col">Model</th>
