@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="FirmwareGym is a benchmark and reinforcement learning environment for AI agents building formally verifiable firmware with h5i and Lean 4.">
-  <title>FirmwareGym — Embedded firmware benchmark</title>
+  <meta name="description" content="FirmwareGym benchmarks AI agents building high-performance Rust firmware with Lean 4 proofs and measured CPU and memory use in Renode.">
+  <title>FirmwareGym — High-performance firmware with Lean 4 proofs</title>
   <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="apple-touch-icon" href="assets/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,7 +197,7 @@
     <div class="hero">
       <div class="hero-copy">
         <h1>FirmwareGym<span class="accent" aria-hidden="true">.</span></h1>
-        <p class="lead">FirmwareGym challenges AI agents to build firmware with the <a href="https://h5i.dev/">h5i framework</a>, prove its behavior in Lean 4, and optimize performance on virtual hardware in Renode.</p>
+        <p class="lead">Build high-performance Rust firmware with Lean 4 proofs. FirmwareGym measures how much AI agents can reduce CPU and memory use while satisfying the same fixed specification and virtual-hardware tests.</p>
         <div class="links">
           <a class="button primary" href="https://docs.google.com/forms/d/e/1FAIpQLSfaIKLfzh8ot_YA5KXQJP9tjPrZghitP8DH6fC6kgFVSNNKig/viewform?usp=publish-editor">Book a demo</a>
           <a class="button" href="https://github.com/h5i-dev/FirmwareGym-Public">View on GitHub</a>
@@ -207,11 +207,11 @@
     </div>
 
     <section id="overview">
-      <h2>Can AI build and formally verify firmware?</h2>
+      <h2>How efficient can verified firmware be?</h2>
       <ul class="overview-list">
-        <li><strong>Build realistic firmware.</strong> Develop high-performance, safe embedded systems with h5i, a Rust framework for building firmware that can be verified with Lean 4.</li>
-        <li><strong>Formally verify its behavior.</strong> Prove critical properties with h5i and Lean 4, such as whether a flash store can recover without partial updates after a power cut.</li>
-        <li><strong>Test on virtual hardware.</strong> Run the compiled firmware through realistic scenarios in Renode and measure CPU instruction counts and memory use.</li>
+        <li><strong>Build realistic firmware.</strong> Implement embedded control, communication, and storage in Rust. Use the <a href="https://h5i.dev/">h5i framework</a> where the task integrates its embedded runtime.</li>
+        <li><strong>Formally verify its behavior.</strong> Prove fixed task properties in Lean 4 against the model extracted from the submitted Rust.</li>
+        <li><strong>Improve measured performance.</strong> Run the compiled firmware in Renode. Compare passing implementations by CPU instruction count, RAM, peak stack, and binary size.</li>
       </ul>
     </section>
 
@@ -222,7 +222,7 @@
           <p class="intro">FirmwareGym spans five difficulty levels. Tasks include coordinating warehouse robots, fusing noisy or faulty sensor readings, controlling motors and batteries, scheduling real-time jobs, and storing data on NOR flash.</p>
           <ul class="overview-list">
             <li><strong>Prove implementation correctness.</strong> Use Lean 4 to prove task-specific properties such as collision-free robot deliveries or recovery of an entire transaction after a power cut.</li>
-            <li><strong>Optimize performance.</strong> Run the compiled firmware through Renode scenarios. Use the raw CPU instruction counts, binary size, RAM usage, and peak stack measurements to guide optimization or define a custom reward. The default reward uses task-specific resource budgets.</li>
+            <li><strong>Optimize performance.</strong> Run the compiled firmware through Renode scenarios. Improve CPU and memory use while preserving the fixed contract. The default proof reward unlocks its performance component when all required checks and resource budgets pass.</li>
           </ul>
         </div>
         <figure class="workflow">
@@ -260,7 +260,7 @@
 
     <section id="results">
       <h2 id="baseline">Public Baseline</h2>
-      <p class="intro">Final evaluation pass rates by domain. Each cell shows the percentage and the number of tasks passed out of those attempted.</p>
+      <p class="intro">Historical final pass rates on the 18-task catalog. Each cell shows the share of tasks that passed every required check.</p>
       <div class="table-scroll" role="region" aria-label="Baseline results by model and domain" tabindex="0">
         <table aria-labelledby="baseline" aria-describedby="method">
           <thead>
@@ -289,7 +289,7 @@
           </tbody>
         </table>
       </div>
-      <p class="note" id="method">One agent run per task, with up to 30 minutes and iterative development feedback. The final grader required successful compilation, all Lean obligations and Renode scenarios, any applicable randomized checks, and all resource budgets.</p>
+      <p class="note" id="method">One agent run per task used up to 30 minutes with iterative development feedback. The final grader required compilation, all fixed Lean obligations, all Renode scenarios and applicable randomized checks, and adherence to resource budgets. Compare resource measurements on the same workloads to assess performance beyond the pass rate.</p>
     </section>
 
     <section id="start">

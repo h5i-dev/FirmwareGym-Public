@@ -3,7 +3,7 @@
 **API Version**: `0.2.0`  
 **OpenAPI Schema**: [`openapi.json`](openapi.json) (also served live at `GET /openapi.json`, with interactive docs at `GET /docs`)
 
-All public API endpoints evaluate submissions against **public specifications only**. Some tasks also run public development checks. Final held-out scenarios and private fuzzing remain operator-only.
+The API reports both correctness and measured performance for candidate firmware. Submit Rust and a Lean 4 proof module, then use the same task and workloads to compare the resource use of implementations that satisfy the fixed contract. Public endpoints evaluate against the public specifications and development checks. Final held-out scenarios and private fuzzing remain operator-only.
 
 ---
 
@@ -122,17 +122,24 @@ Resource readings are in `metrics`. Each `budgets.utilization` value is the meas
 - `binary_bytes`: ARM Cortex-M4 ELF Flash occupancy (`.text` + `.rodata` + `.data`).
 - `static_ram_bytes`: Static `.data` + `.bss` bytes from the ELF.
 - `state_bytes`: `core::mem::size_of::<firmware::State>()`.
-- `peak_stack_bytes`: Runtime peak stack depth inside `firmware::transition`, measured on Cortex-M4 via stack canary painting.
+- `peak_stack_bytes`: Peak stack use recorded by the Cortex-M4 harness during measured steps using stack canary painting.
 - `total_ram_bytes`: `static_ram_bytes + state_bytes`.
-- `executed_instructions`: Exact sum of Cortex-M4 ARM Thumb-2 instructions spent inside `firmware::transition` across all scenario steps (idle polling `nop`s and harness I/O excluded).
-- `max_step_instructions`: Worst-case single-step instruction count (WCET proxy).
-- `avg_step_instructions`: Mean instructions per step.
+- `executed_instructions`: Total Cortex-M4 instruction count within the public scenario's measured steps. The step boundary depends on the task harness. It can include h5i runtime operations such as request handling and saving or restoring a snapshot.
+- `max_step_instructions`: Largest instruction count observed in a measured step. This captures the workload's slowest measured step in instruction count. Final evaluation can include held-out and fuzz workloads in the peak.
+- `avg_step_instructions`: Mean instructions per measured step in the public scenario.
 
 #### Default Reward vs. Custom Rewards
 
 A proof submission includes an independent verdict for each fixed theorem. `proved` earns credit, `unproved` means the theorem was not accepted, and `not_checked` means the grader could not reach that check. Rust-only evaluation can return a formal total of zero. Check that the formal total is positive when a custom reward requires proof.
 
 The server returns the reward scheme in `reward.scheme`. Proof submissions use `correctness_gated_proof_v2` and need all required proof checks, public runtime checks, and resource budgets to pass for the performance bonus. Rust-only evaluation uses `correctness_gated_v1`. Use the reported metrics and baseline ratios for custom rewards and handle metrics that are absent.
+
+For a performance comparison, hold the task revision and workload constant.
+Use the raw metrics to report the improvement between two passing submissions.
+Where task-specific baselines are available, `performance.ratios` reports
+improvement factors. For a positive baseline and a positive measured value,
+a factor above 1.0 indicates an improvement in the configured direction.
+`budgets.utilization` divides measured usage by the configured resource limit.
 
 ---
 

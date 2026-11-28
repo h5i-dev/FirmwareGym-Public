@@ -1,17 +1,16 @@
 # FirmwareGym
 
-**FirmwareGym** is a benchmark and reinforcement learning environment for generating formally verifiable, high-performance firmware. This benchmark challenges AI agents to develop Rust (`#![no_std]`) firmware for realistic embedded systems, satisfying formal specifications and hardware-level tests while optimizing the performance.
+**FirmwareGym is a benchmark and reinforcement learning environment for building high-performance firmware with Lean 4 proofs.** Agents submit Rust (`#![no_std]`) firmware and proofs that the implementation meets a fixed specification. They then improve the measured performance of the firmware while continuing to satisfy the same proof obligations, runtime requirements, and resource limits.
 
 ## 1. Overview
 
-FirmwareGym evaluates each firmware submission across four dimensions:
+Each task provides a fixed contract and measured resource metrics. Once two implementations pass the contract, compare their instruction counts, stack, RAM, and binary footprint to see what each optimization saves.
 
-- **Formal verification**: The number and proportion of successfully proven properties using [h5i](https://github.com/h5i-dev/h5i) and Lean 4.
-- **Simulation pass rate**: The number and proportion of passed test scenarios when executing compiled firmware on virtual hardware using [Renode](https://github.com/renode/renode).
-- **Execution efficiency**: Total, average, and maximum per-step CPU instruction counts.
-- **Memory efficiency**: Binary size, RAM usage, and peak stack usage.
+- **Prove the implementation** against each fixed Lean 4 obligation using the [h5i](https://github.com/h5i-dev/h5i) toolchain. The grader extracts the Lean model from the submitted Rust for the Cortex-M target used in simulation.
+- **Test the firmware** on virtual hardware in [Renode](https://github.com/renode/renode). The development API reports public checks; final grading can also include held-out scenarios and randomized workloads.
+- **Improve measured performance** by reducing total, average, or peak per-step instruction counts, binary size, RAM usage, or peak stack. Resource limits define acceptable usage, and the raw measurements show how much an optimization saves within those limits.
 
-All raw evaluation metrics are accessible through the SDK, allowing researchers to define custom reward functions for their RL training objectives.
+The default proof reward unlocks its performance component once the required proof and runtime checks pass within budget. The SDK exposes individual proof verdicts and raw resource measurements for custom RL rewards. A proof pass rate describes an agent run under its stated time budget. Compare performance across fully passing submissions on the same task revision and workloads.
 
 ## 2. Tasks
 
@@ -65,6 +64,9 @@ print("Renode:", result.simulation.passed, "/", result.simulation.total)
 for obligation in result.obligations:
     print(obligation.id, obligation.status, obligation.feedback)
 print("Reward:", result.reward)
+if result.metrics is not None:
+    print("Peak instructions per step:", result.metrics.max_step_instructions)
+    print("Peak stack bytes:", result.metrics.peak_stack_bytes)
 ```
 
 Submit without `proof` to test the Rust implementation in Renode. Use the REST proof path for joint Rust and Lean evaluation.
@@ -95,7 +97,7 @@ with OpenEnvClient(
 
 ### 3.4. Custom Reward Functions
 
-Researchers can define their own reward functions using raw verification results and performance metrics.
+Researchers can define their own reward functions using raw verification results and performance metrics. This example rewards lower peak instruction counts after the development correctness checks and resource budgets pass.
 
 ```python
 from firmwaregym import Evaluation
@@ -110,7 +112,7 @@ def custom_reward(ev: Evaluation) -> float:
     if ev.simulation.passed < ev.simulation.total:
         return 0.0
 
-    if ev.metrics is None:
+    if ev.budgets is None or not ev.budgets.passed or ev.metrics is None:
         return 0.0
 
     instructions = ev.metrics.max_step_instructions
