@@ -1,4 +1,4 @@
-# Crash-consistent NOR flash key-value store
+# NOR flash store
 
 FirmwareGym L4 task ID `flash-kv-store-nor`. Implement a 16-key store with staged batches of at most four distinct keys. Reads see committed values. An acknowledged commit survives a reboot. If power fails before a reply, recovery must return the entire old or new map. Rebooting again must recover the same map.
 

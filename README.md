@@ -136,7 +136,7 @@ to the full task collection and hosted evaluation environment requires an API ke
 - [Quickstart Example](examples/quickstart.py): Firmware evaluation and custom rewards.
 - [OpenEnv Example](examples/openenv_rollout.py): Multi-turn RL rollouts.
 - [Overcurrent Trip](examples/overcurrent_starter/): Introductory task and starter code.
-- [Crash-consistent NOR flash store](examples/flash_kv_nor_starter/): L4 task with a Rust starter and Lean proof template.
+- [NOR flash store](examples/flash_kv_nor_starter/): L4 task with a Rust starter and Lean proof template.
 
 ## 6. License
 
