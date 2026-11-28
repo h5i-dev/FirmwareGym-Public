@@ -240,7 +240,7 @@
         </figure>
       </div>
       <div id="samples" class="samples">
-        <p class="intro">The full dataset and task catalog are currently private, and hosted access requires an API key. Two sample tasks are publicly available:</p>
+        <p class="intro">Access to the full dataset (25 tasks) requires an API key.</p>
         <div class="sample-grid">
           <a class="sample-card" href="https://github.com/h5i-dev/FirmwareGym-Public/tree/main/examples/overcurrent_starter" aria-labelledby="sample-title-1" aria-describedby="sample-description-1">
             <span class="sample-number">Sample - 1</span>
@@ -262,7 +262,7 @@
       <h2 id="baseline">Public Baseline</h2>
       <p class="intro">Both models attempted the same 25 tasks. The performance column counts tasks where a model used fewer peak instructions among the eight tasks both models fully passed. Two tasks tied.</p>
       <div class="table-scroll" role="region" aria-label="Baseline performance and pass rates by model" tabindex="0">
-        <table aria-labelledby="baseline" aria-describedby="method">
+        <table aria-labelledby="baseline">
           <thead>
             <tr>
               <th scope="col">Model</th>
@@ -302,7 +302,6 @@
           </tbody>
         </table>
       </div>
-      <p class="note" id="method">One run per model and task used up to 30 minutes with iterative development feedback. A complete pass required compilation, all fixed Lean obligations, all Renode scenarios and applicable randomized checks, and adherence to resource budgets. Lean accepted 69 of 107 obligations for Terra and 75 of 107 for Sonnet. These totals include 9 unchecked obligations for Terra and 11 for Sonnet. Terra’s Embedded VM run ended early after a Lean extraction or setup error.</p>
     </section>
 
     <section id="start">
