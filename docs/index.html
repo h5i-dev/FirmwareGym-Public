@@ -197,7 +197,7 @@
     <div class="hero">
       <div class="hero-copy">
         <h1>FirmwareGym<span class="accent" aria-hidden="true">.</span></h1>
-        <p class="lead">Build high-performance Rust firmware with Lean 4 proofs. FirmwareGym measures how much AI agents can reduce CPU and memory use while satisfying the same fixed specification and virtual-hardware tests.</p>
+        <p class="lead">Build high-performance Rust firmware with Lean 4 proofs. FirmwareGym measures how effectively AI agents optimize CPU and memory use while formally verifying their implementations.</p>
         <div class="links">
           <a class="button primary" href="https://docs.google.com/forms/d/e/1FAIpQLSfaIKLfzh8ot_YA5KXQJP9tjPrZghitP8DH6fC6kgFVSNNKig/viewform?usp=publish-editor">Book a demo</a>
           <a class="button" href="https://github.com/h5i-dev/FirmwareGym-Public">View on GitHub</a>
@@ -209,7 +209,7 @@
     <section id="overview">
       <h2>How efficient can verified firmware be?</h2>
       <ul class="overview-list">
-        <li><strong>Build realistic firmware.</strong> Implement embedded control, communication, and storage in Rust. Use the <a href="https://h5i.dev/">h5i framework</a> where the task integrates its embedded runtime.</li>
+        <li><strong>Build realistic firmware.</strong> Implement robot coordination, embedded control, communication protocols, and crash-safe storage in Rust with <a href="https://h5i.dev/">h5i</a>.</li>
         <li><strong>Formally verify its behavior.</strong> Prove fixed task properties in Lean 4 against the model extracted from the submitted Rust.</li>
         <li><strong>Improve measured performance.</strong> Run the compiled firmware in Renode. Compare passing implementations by CPU instruction count, RAM, peak stack, and binary size.</li>
       </ul>
@@ -260,7 +260,7 @@
 
     <section id="results">
       <h2 id="baseline">Public Baseline</h2>
-      <p class="intro">Historical final pass rates on the 18-task catalog. Each cell shows the share of tasks that passed every required check.</p>
+      <p class="intro">Final pass rates on the same 25-task catalog. Each cell shows the share of tasks that passed every required check.</p>
       <div class="table-scroll" role="region" aria-label="Baseline results by model and domain" tabindex="0">
         <table aria-labelledby="baseline" aria-describedby="method">
           <thead>
@@ -277,19 +277,29 @@
           </thead>
           <tbody>
             <tr>
-              <th scope="row">Claude Opus 5.5</th>
-              <td class="rate">100% <span>7 / 7</span></td>
-              <td class="rate">50% <span>1 / 2</span></td>
-              <td class="rate">33% <span>1 / 3</span></td>
+              <th scope="row">GPT-6.1 Terra</th>
+              <td class="rate">62% <span>5 / 8</span></td>
+              <td class="rate">17% <span>1 / 6</span></td>
+              <td class="rate">20% <span>1 / 5</span></td>
               <td class="rate">50% <span>1 / 2</span></td>
               <td class="rate">33% <span>1 / 3</span></td>
               <td class="rate">0% <span>0 / 1</span></td>
-              <td class="rate overall">61% <span>11 / 18</span></td>
+              <td class="rate overall">36% <span>9 / 25</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Claude Sonnet 5.5</th>
+              <td class="rate">88% <span>7 / 8</span></td>
+              <td class="rate">50% <span>3 / 6</span></td>
+              <td class="rate">60% <span>3 / 5</span></td>
+              <td class="rate">50% <span>1 / 2</span></td>
+              <td class="rate">33% <span>1 / 3</span></td>
+              <td class="rate">0% <span>0 / 1</span></td>
+              <td class="rate overall">60% <span>15 / 25</span></td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="note" id="method">One agent run per task used up to 30 minutes with iterative development feedback. The final grader required compilation, all fixed Lean obligations, all Renode scenarios and applicable randomized checks, and adherence to resource budgets. Compare resource measurements on the same workloads to assess performance beyond the pass rate.</p>
+      <p class="note" id="method">One run per model and task used up to 30 minutes with iterative development feedback. A complete pass required compilation, all fixed Lean obligations, all Renode scenarios and applicable randomized checks, and adherence to resource budgets. Lean accepted 69 of 107 obligations for Terra and 75 of 107 for Sonnet. These totals include 9 unchecked obligations for Terra and 11 for Sonnet. Terra’s Embedded VM run ended early after a Lean extraction or setup error.</p>
     </section>
 
     <section id="start">
